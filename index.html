@@ -273,6 +273,9 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   D.sections.forEach(function(s){if(s.id!=='pneuma') return; s.groups.forEach(function(g){g.tile=[211,180];
     g.items.forEach(function(it){var m=/^Pneuma(?: (\d+))?$/.exec(it.name); if(m) it.images=[{src:'assets/pneuma'+(m[1]||1)+'-novo.gif',w:180,h:180,pixel:false}];});
     [5,6].forEach(function(n){g.items.push({name:'Pneuma '+n,href:'#',desc:null,badge:null,images:[{src:'assets/pneuma'+n+'-novo.gif',w:180,h:180,pixel:false}]});});});});
+  // Tarot Cards 11: new item, GIF built from the client's tarot01-14.tga (1 s per card)
+  D.sections.forEach(function(s){if(s.id!=='tarotcard') return; s.groups.forEach(function(g){
+    g.items.push({name:'Tarot Cards 11',href:'#',desc:null,badge:null,images:[{src:'assets/tarot_cards11.gif',w:85,h:170,pixel:false}]});});});
   // Skill Icon Traps: the old still image is replaced by the animated GIF in assets/items
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(s.id==='effectedits'&&it.name==='Skill Icon Traps') it.images=[];});});});
   // TEYSVault: every download points to google.com for now (real links will come later); RO Cooldown Overlay keeps its real link
