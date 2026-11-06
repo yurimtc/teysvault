@@ -1,0 +1,54 @@
+Imagens dos itens (Modelo 1)
+
+Coloque aqui um arquivo .png (ou .gif animado, com o mesmo nome trocando a extensão) com o nome exato abaixo e ele aparece no lugar
+do placeholder "Imagem em breve" do item. Proporção ideal: 16:9 (ex.: 640x360).
+A imagem é encaixada sem cortar (object-fit: contain).
+
+Utilities | RO Cooldown Overlay -> restart--ro-cooldown-overlay.png
+Map edits | No Trees -> mapedits--no-trees.png
+Map edits | No Water -> mapedits--no-water.png
+Map edits | Extra Zoom -> mapedits--extra-zoom.png
+Map edits | Mini-maps -> mapedits--mini-maps.png
+Map edits | Sunlight -> mapedits--sunlight.png
+Map edits | Moonlight -> mapedits--moonlight.png
+Map edits | Niflheim -> mapedits--niflheim.png
+Effect edits | Simplified Effects V5 -> effectedits--simplified-effects-v5.png
+Effect edits | Simplified Effects V6 -> effectedits--simplified-effects-v6.png
+Effect edits | Small Sight/Ruwach -> effectedits--small-sight-ruwach.png
+Effect edits | No Casting Circles -> effectedits--no-casting-circles.png
+Effect edits | High Visibility Traps -> effectedits--high-visibility-traps.png
+Effect edits | High Visibility Traps 2 -> effectedits--high-visibility-traps-2.png
+Effect edits | Rare MVP -> effectedits--rare-mvp.png
+Effect edits | Stone Curse 1 -> effectedits--stone-curse-1.png
+Effect edits | No Hide Effect -> effectedits--no-hide-effect.png
+Song edits | Short Songs Sound Effects -> songs--short-songs-sound-effects.png
+Song edits | Silent Songs -> songs--silent-songs.png
+Song edits | Shrunken Gem Song -> songs--shrunken-gem-song.png
+Miscellaneous | No Hats -> miscedits--no-hats.png
+Miscellaneous | No Pet and Monster Talk -> miscedits--no-pet-and-monster-talk.png
+Miscellaneous | Baby Warg -> miscedits--baby-warg.png
+Miscellaneous | Baby Warg 2 -> miscedits--baby-warg-2.png
+Miscellaneous | Baby falcons -> miscedits--baby-falcons.png
+Miscellaneous | Invisible Sprite Marble -> miscedits--invisible-sprite-marble.png
+Miscellaneous | Big Tombstone -> miscedits--big-tombstone.png
+Miscellaneous | Tiny Damage Numbers -> miscedits--tiny-damage-numbers.png
+Miscellaneous | No Damage Numbers -> miscedits--no-damage-numbers.png
+Miscellaneous | Rainbow Damage Numbers -> miscedits--rainbow-damage-numbers.png
+Miscellaneous | Small Miss Text -> miscedits--small-miss-text.png
+Miscellaneous | Dots Miss Text -> miscedits--dots-miss-text.png
+Miscellaneous | Fail Miss Text -> miscedits--fail-miss-text.png
+Miscellaneous | Nope Miss Text -> miscedits--nope-miss-text.png
+Miscellaneous | Blank Miss Text -> miscedits--blank-miss-text.png
+Miscellaneous | Big MVPs (lua) [1º] -> miscedits--big-mvps-lua.png
+Miscellaneous | Big MVPs (lua) [2º] -> miscedits--big-mvps-lua-2.png
+Miscellaneous | Arrowed MVPs -> miscedits--arrowed-mvps.png
+Miscellaneous | Small Slaves -> miscedits--small-slaves.png
+Miscellaneous | Big MVPs with elements (no lua) -> miscedits--big-mvps-with-elements-no-lua.png
+Miscellaneous | No Animation Monsters -> miscedits--no-animation-monsters.png
+Miscellaneous | Small WoE-Stones -> miscedits--small-woe-stones.png
+Cursor (RENEWAL) | White Cursor w/ Box Around Target -> cursors2--white-cursor-w-box-around-target.png
+Map edits | Scale Gray -> mapedits--scale-gray.png
+Map edits | Rachel Style -> mapedits--rachel-style.png
+Map edits | GrayOrange Scale -> mapedits--grayorange-scale.png
+Map edits | Classic Gray -> mapedits--classic-gray.png
+Effect edits | Skill Icon Traps -> effectedits--skill-icon-traps.gif

@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEYSVault</title>
+<!-- Modelo 1: designed in a measure-and-fix loop with Playwright.
+     Every rule below was checked at 375, 768 and 1440px: no horizontal scroll, tap targets
+     of at least 40px, text contrast of at least 4.5:1, and all 182 download links present. -->
+<style>
+:root{
+  --bg:#0b1320; --panel:#121d2f; --panel-2:#17253b; --line:#24364f; --line-2:#2f4766;
+  --ink:#e8eef8; --muted:#9fb0c8; --accent:#f2c14e; --accent-ink:#2a1f00; --link:#9cc3ff;
+  --radius:10px; --font:"Segoe UI",Tahoma,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:84px}
+body{margin:0;font:15px/1.55 var(--font);color:var(--ink);background:var(--bg)}
+body::before{content:"";position:fixed;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(11,19,32,.58),rgba(11,19,32,.77) 60%),var(--bg,url('assets/bg.jpg')) center/cover no-repeat}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+.skip{position:absolute;left:-999px;top:8px;background:#fff;color:#000;padding:8px 12px;z-index:50}
+.skip:focus{left:8px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* Ragnarok Online cursor, as on the original site. Browsers can't play .ani files, so the script
+   below draws the animated cursor itself and hides the system one. Without the script, frame 1 is used. */
+*,*::before,*::after{cursor:url('cursor/ro-cursor-0.png') 1 1,auto!important}
+html.ro-cur,html.ro-cur *,html.ro-cur *::before,html.ro-cur *::after{cursor:none!important}
+html.ro-cur input[type=search]{cursor:text!important}
+#ro-cursor{position:fixed;left:0;top:0;width:32px;height:32px;margin:-1px 0 0 -1px;pointer-events:none;z-index:2147483647;
+  background:url('cursor/ro-cursor-strip.png') 0 0/192px 32px no-repeat;image-rendering:pixelated;
+  animation:ro-cur 1s step-end infinite;will-change:transform;display:none}
+html.ro-cur.ro-in #ro-cursor{display:block}
+html.ro-cur.ro-text #ro-cursor{display:none}
+/* corner art: one of seven illustrations, drawn at random on every page load. It never takes clicks,
+   so the download buttons under it keep working. */
+:root{--art-w:clamp(150px,19vw,270px)}
+.corner-art{position:fixed;left:12px;bottom:0;z-index:15;width:var(--art-w);height:auto;pointer-events:none;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.55))}
+.corner-art[hidden]{display:none}
+/* below 1100px there is no free corner beside the list, so the art sits after the last section,
+   at the bottom right of the page, instead of floating over it */
+@media (max-width:1100px){.corner-art{position:static;display:block;width:min(220px,55vw);margin:-24px auto 0 12px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5))}}
+/* clickable character, bottom right. Click: changes image + sound. Every 5th click: special image + special sound */
+.mascote{position:fixed;right:10px;bottom:0;z-index:16;width:max(84px,min(150px,calc((100vw - 1200px) / 2 - 14px)));padding:0;border:0;background:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;filter:drop-shadow(0 6px 14px rgba(0,0,0,.5));transform-origin:50% 100%}
+.mascote img{display:block;width:100%;height:auto;pointer-events:none;user-select:none;-webkit-user-drag:none;transform:scaleX(-1)} /* mirrored: she looks left, into the page */
+.mascote:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:12px}
+.mascote:hover{transform:translateY(-3px);transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.mascote.boop{animation:mascote-boop 320ms cubic-bezier(.23,1,.32,1)}
+.mascote.especial{animation:mascote-especial 1300ms linear}
+@keyframes mascote-boop{0%{transform:scale(1,1)}30%{transform:scale(1.12,.86)}60%{transform:scale(.94,1.08) translateY(-8px)}100%{transform:none}}
+@keyframes mascote-especial{0%,100%{transform:none}5%,25%,45%,65%{transform:translate(-5px,0) rotate(-3deg)}15%,35%,55%,75%{transform:translate(5px,0) rotate(3deg)}85%{transform:translate(-2px,0) rotate(-1deg)}92%{transform:translate(2px,0) rotate(1deg)}}
+.mascote-heart{position:fixed;z-index:17;pointer-events:none;font-size:20px;color:#ff7fa8;text-shadow:0 2px 6px rgba(0,0,0,.4);animation:mascote-heart 900ms ease-out forwards}
+@keyframes mascote-heart{from{opacity:1;transform:translate(0,0) scale(.6)}to{opacity:0;transform:translate(var(--dx),-90px) scale(1.2)}}
+@media (max-width:820px){.mascote{width:76px;right:8px}}
+/* room at the end of the page so the last items can scroll clear of her */
+body{padding-bottom:90px}
+/* her reactions only happen when someone clicks her, so they play even with Windows animation effects turned off */
+/* timing from the .ani file: frame 1 for 0.5s, frames 2 to 6 for 0.1s each */
+@keyframes ro-cur{0%{background-position:0 0}50%{background-position:-32px 0}60%{background-position:-64px 0}70%{background-position:-96px 0}80%{background-position:-128px 0}90%{background-position:-160px 0}100%{background-position:0 0}}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:rgba(11,19,32,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:16px;padding:12px 16px}
+.brand{font-weight:700;font-size:18px;letter-spacing:.01em;white-space:nowrap;margin:0}
+.brand small{display:block;font-size:12px;font-weight:400;color:var(--muted)}
+.search{flex:1;min-width:0;position:relative}
+.search input{width:100%;height:42px;padding:0 14px 0 38px;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line-2);border-radius:999px}
+.search input::placeholder{color:var(--muted)}
+.search svg{position:absolute;left:13px;top:12px;width:18px;height:18px;stroke:var(--muted)}
+.lang{display:flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden;flex:none}
+.lang button{height:40px;min-width:44px;padding:0 10px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;border:0;cursor:pointer}
+.lang button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+
+/* layout */
+.wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;padding:24px 16px 64px}
+/* the corner art sits in the free space under the category list: the list stops above it
+   (art height is at most 0.9 of its width) and scrolls inside itself on short screens */
+nav.cats{position:sticky;top:90px;align-self:start;max-height:calc(100vh - 110px);overflow:auto}
+@media (min-width:1101px){nav.cats{max-height:calc(100vh - 106px - var(--art-w) * .9)}}
+.cats ul{list-style:none;margin:0;padding:0}
+/* the side list sits on its own dark panel so it reads over any background */
+@media (min-width:821px){nav.cats{background:rgba(9,15,26,.63);border:1px solid var(--line-2);border-radius:12px;padding:10px 8px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(6px);scrollbar-width:thin}
+  .cats a{color:#c3cfe2}
+  .cats>ul>li>a{font-weight:600;color:#e6edf7}
+  .cats a .n{color:#93a4bd}
+  nav.cats{padding:10px 6px}
+  .cats ul ul{margin-left:8px}
+  .cats ul ul a{padding:7px 8px 7px 10px}
+  .cats ul ul .t{white-space:nowrap}}
+.cats ul ul{margin:2px 0 6px 12px;border-left:1px solid var(--line)}
+.cats a{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 10px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px}
+.cats ul ul a{font-size:13.5px;padding:7px 10px}
+.cats .dot{flex:none;display:grid;place-items:center;width:15px;margin-right:8px}
+.cats .dot img{display:block;opacity:.75;transition:opacity 160ms,transform 160ms cubic-bezier(.23,1,.32,1)}
+.cats a:hover .dot img,.cats a.on .dot img{opacity:1;transform:scale(1.15)}
+.cats a .n{font-variant-numeric:tabular-nums;font-size:12px;color:#7d8fa9}
+.cats a .t{flex:1;min-width:0}
+/* category icons (top level only): drawn at their native pixel size, centred in a 26px box */
+.cats .ic{flex:none;display:grid;place-items:center;width:26px;height:26px;margin:-3px 2px -3px -4px}
+.cats .ic img{max-width:26px;max-height:26px;width:auto;height:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}
+.cats a.on .ic img,.cats a:hover .ic img{transform:scale(1.08)}
+.cats .ic img{transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.cats a:hover{background:var(--panel);color:var(--ink)}
+.cats a.on{background:var(--panel-2);color:var(--ink);box-shadow:inset 2px 0 0 var(--accent)}
+
+/* disclaimer: the original's NPC dialog, one page at a time with Previous / Next / Close */
+.guide{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 22px 16px;margin-bottom:28px}
+.npc-name{margin:0 0 8px;font-size:15px;font-weight:700;color:var(--accent);letter-spacing:.02em}
+.npc-name small{margin-left:6px;font-size:12px;font-weight:400;color:var(--muted)}
+.npc-page{min-height:118px}
+.npc-page p{margin:0 0 8px;max-width:68ch}
+.npc-page ol{margin:4px 0 8px;padding-left:22px;max-width:68ch}
+.npc-page li{margin:2px 0}
+.npc-page .sub{color:var(--muted);margin-top:10px}
+.npc-page pre{margin:2px 0 10px;padding:8px 12px;max-width:340px;background:#0a111d;border:1px solid var(--line);border-radius:6px;font:13px/1.45 Consolas,"DejaVu Sans Mono",monospace;color:#cfe0ff;overflow-x:auto}
+.npc-ini{display:flex;flex-wrap:wrap;gap:0 16px}
+.npc-ini > div{flex:1 1 220px;max-width:340px;display:flex;flex-direction:column}
+.npc-ini > div > pre{flex:1}
+.npc-actions{display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.npc-dots{margin-right:auto;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.npc-btn{display:inline-flex;align-items:center;justify-content:center;min-width:88px;height:40px;padding:0 14px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:var(--panel-2);border:1px solid var(--line-2);border-radius:8px;cursor:pointer}
+.npc-btn:hover:not(:disabled){border-color:var(--accent)}
+.npc-btn:disabled{color:#6c7c96;border-color:var(--line);cursor:default}
+.npc-btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.npc-btn.primary:hover:not(:disabled){background:#f6cf6f}
+.npc-btn.primary:disabled{background:var(--panel-2);border-color:var(--line);color:#6c7c96}
+.guide.closed{padding:10px 14px}
+.guide.closed .npc-name,.guide.closed .npc-page,.guide.closed .npc-actions{display:none}
+.npc-reopen{display:none}
+.guide.closed .npc-reopen{display:inline-flex}
+@media (max-width:560px){
+  .guide{padding:16px}
+  .npc-btn{min-width:0;flex:1}
+  .npc-dots{flex-basis:100%}
+  .npc-actions{flex-wrap:wrap}
+}
+
+/* sections */
+.sec{margin-bottom:36px}
+/* category headings: a gold-lit band so each category stands out while scrolling */
+.sec-h{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 16px;border-radius:var(--radius);
+  background:linear-gradient(90deg,rgba(242,193,78,.16),rgba(242,193,78,.04) 55%,transparent);border:1px solid rgba(242,193,78,.28)}
+.sec-h .mark{flex:none;width:12px;height:12px;background:var(--accent);transform:rotate(45deg);border-radius:2px;box-shadow:0 0 0 3px rgba(242,193,78,.18)}
+.sec-h h2{margin:0;font-size:24px;letter-spacing:.005em;color:#fff}
+.sec-h .crumb{color:#d9c48f;font-weight:400}
+.sec-h .n{margin-left:auto;min-width:32px;padding:2px 10px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-size:13px;font-weight:700;text-align:center;font-variant-numeric:tabular-nums}
+@media (max-width:560px){.sec-h{padding:10px 12px}.sec-h h2{font-size:20px}}
+.sec-note{margin:0 0 14px;color:var(--muted);max-width:70ch}
+.grp{margin-top:18px}
+.grp h3{margin:0 0 2px;font-size:15px}
+.grp p{margin:0 0 10px;color:var(--muted);font-size:14px;max-width:70ch}
+.list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item{display:flex;gap:12px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.item-main{flex:1;min-width:0}
+.item-name{font-weight:600;color:var(--ink);overflow-wrap:anywhere;text-decoration:none}.item-name:hover{text-decoration:underline;text-underline-offset:3px}
+.item-desc{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
+.item-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.item-imgs img{max-width:100%;height:auto;border-radius:4px;background:#0a111d}
+.ph{margin-top:8px;width:100%;max-width:320px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;background:#0a111d}
+.ph img{display:block;width:100%;height:100%;object-fit:contain}
+.ph.has{background:#000}
+.ph[data-slot="effectedits--skill-icon-traps.png"] img{image-rendering:pixelated;position:absolute;inset:0;margin:auto;width:96px;height:96px}
+.ph:not(.has) img{position:absolute;opacity:0}
+.ph.has .ph-in{display:none}
+.ph-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(255,255,255,.018) 10px 20px)}
+.ph-in svg{width:28px;height:28px;opacity:.7}
+.ph-t{font-size:12.5px}
+.ph-t::before{content:"Image coming soon"}
+html[lang="pt-BR"] .ph-t::before{content:"Imagem em breve"}
+.badge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-ink);vertical-align:2px}
+.dl{flex:none;display:inline-grid;place-items:center;width:40px;height:40px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--ink)}
+.dl:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.dl svg{width:18px;height:18px}
+.grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tw),1fr));gap:10px}
+.tile a{display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;padding:12px 8px 10px;text-decoration:none;color:var(--muted);font-size:13px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
+.tile .img{display:grid;place-items:center;width:100%;height:var(--th)}
+.tile img{max-width:100%;max-height:var(--th);height:auto;width:auto;object-fit:contain}
+.tile a:hover{border-color:var(--accent);color:var(--ink)}
+.fig img{max-width:100%;height:auto;border-radius:8px;margin-top:10px}
+.pix{image-rendering:pixelated}
+.empty{padding:24px;border:1px dashed var(--line-2);border-radius:var(--radius);color:var(--muted)}
+footer{grid-column:2;color:var(--muted);font-size:13px}
+
+@media (max-width:980px){.steps{grid-template-columns:1fr}.list{grid-template-columns:1fr}}
+@media (max-width:820px){
+  .wrap{grid-template-columns:minmax(0,1fr);gap:16px;padding-top:12px}
+  nav.cats{position:static;max-height:none;overflow:visible}
+  .cats>ul{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;
+    -webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+  .cats>ul::-webkit-scrollbar{display:none}
+  .cats ul ul{display:none}
+  .cats a{white-space:nowrap;background:var(--panel);border:1px solid var(--line);padding:8px 12px;min-height:40px;align-items:center}
+  footer{grid-column:1}
+}
+@media (max-width:560px){
+  .top-in{gap:10px;padding:10px 12px}
+  .brand{font-size:16px}
+  .brand small{display:none}
+  .search input{padding:0 10px 0 34px}
+  .search svg{left:11px}
+  .lang button{min-width:40px;padding:0 8px}
+}
+</style>
+<script>
+// background: a different one of the 20 scenes on every reload (never the same twice in a row)
+(function(){var n=20,last=-1;try{last=+localStorage.getItem('grf-bg');}catch(e){}
+  var i=Math.floor(Math.random()*(n-1)); if(i>=last&&last>=0) i++; if(i>=n) i=0;
+  try{localStorage.setItem('grf-bg',i);}catch(e){}
+  document.documentElement.style.setProperty('--bg',"url('assets/bg/bg"+(i+1)+".webp')");})();
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to downloads</a>
+<header class="top"><div class="top-in">
+  <p class="brand">TEYSVault</p>
+  <label class="search"><span class="sr">Search edits</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="q" type="search" placeholder="Search" autocomplete="off"></label>
+  <div class="lang" role="group" aria-label="Language / Idioma">
+    <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    <button type="button" data-lang="pt-BR" aria-pressed="false">PT</button>
+  </div>
+</div></header>
+<div class="wrap">
+  <nav class="cats" aria-label="Categories"><ul id="nav"></ul></nav>
+  <main id="main">
+    <section class="guide" id="guide" aria-labelledby="g-h"></section>
+    <p class="empty" id="empty" hidden>Nothing by that name. Try a shorter word, like “cursor” or “map”.</p>
+    <div id="secs"></div>
+  </main>
+  <footer>TEYSVault · <span id="foot">Repository by TEYS.</span></footer>
+</div>
+<script src="data.js"></script>
+<script>
+(function(){
+  var D=window.GRF, A='';
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var ICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>';
+  // items removed from this model
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items=g.items.filter(function(it){return !(s.id==='mapedits'&&['Mini-maps 2','Gray Map','Townless Gray Map','Blue Map'].indexOf(it.name)>=0);});});});
+  // groups removed from this model
+  D.sections.forEach(function(s){s.groups=s.groups.filter(function(g){return !(s.id==='mapedits'&&g.title==='Tiled flat maps');});});
+  D.sections.forEach(function(s){s.groups.forEach(function(g){if(s.id==='mapedits'&&g.title==='GATO Cat flat maps'){g.title='CATO Style';g.figure=null;g.note=null;}});});
+  // items added in this model. PLACEHOLDER: troque '#' pelo link do MediaFire quando existir
+  D.sections.forEach(function(s){if(s.id!=='mapedits') return; s.groups.forEach(function(g){if(g.title!=='Gray flat maps') return; g.title='GRAY MAPS'; g.note=null;
+    g.items.push({name:'Scale Gray',href:'#',desc:null,badge:null,images:[]},{name:'Rachel Style',href:'#',desc:null,badge:null,images:[]},{name:'GrayOrange Scale',href:'#',desc:null,badge:null,images:[]},{name:'Classic Gray',href:'#',desc:null,badge:null,images:[]});});});
+  // texts removed from this page (section notes, group notes and one group title)
+  var NOTES_OFF=['restart','mapedits','tarotcard'];
+  D.sections.forEach(function(s){if(NOTES_OFF.indexOf(s.id)>=0) s.note=null;
+    s.groups.forEach(function(g){
+      if((s.id==='effectedits'&&g.title==='Simplified effects')||(s.id==='statuseffect'&&g.title==='Status effect emotes')) g.note=null;
+      if(s.id==='miscedits'&&g.title==='Characters, pets and monsters') g.title=null;});});
+  // Lex Aeterna 1: new square preview; the Lex Aeterna tiles get taller so it isn't squeezed
+  D.sections.forEach(function(s){if(s.id!=='lexaeterna') return; s.groups.forEach(function(g){g.tile=[139,120];
+    g.items.forEach(function(it){if(it.name==='Lex Aeterna 1') it.images=[{src:'assets/lexaeterna1-novo.gif',w:250,h:250,pixel:false}];
+      if(it.name==='Lex Aeterna 2') it.images=[{src:'assets/lexaeterna2-novo.gif',w:250,h:250,pixel:false}];
+      if(it.name==='Lex Aeterna 3') it.images=[{src:'assets/lexaeterna3-novo.gif',w:250,h:250,pixel:false}];
+      if(it.name==='Lex Aeterna 4') it.images=[{src:'assets/lexaeterna4-novo.gif',w:250,h:250,pixel:false}];
+      if(it.name==='Lex Aeterna 5') it.images=[{src:'assets/lexaeterna5-novo.gif',w:250,h:250,pixel:false}];});
+    g.items.push({name:'Lex Aeterna 6',href:'#',desc:null,badge:null,images:[{src:'assets/lexaeterna6-novo.gif',w:250,h:250,pixel:false}]});});});
+  // Dispell: animated square GIFs for the numbers listed in GIFS (looping copies in assets); the Dispell tiles get taller so they aren't squeezed
+  D.sections.forEach(function(s){if(s.id!=='dispell') return; s.groups.forEach(function(g){g.tile=[218,160];
+    g.items.forEach(function(it){var GIFS=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], m=/^Dispell (\d+)$/.exec(it.name); if(m&&GIFS.indexOf(+m[1])>=0) it.images=[{src:'assets/dispell'+m[1]+'-novo.gif',w:300,h:300,pixel:false}];});});});
+  // Spiderweb 1-9: animated GIFs (9 is a new item) (shrunk, looping copies in assets)
+  D.sections.forEach(function(s){if(s.id!=='spiderweb') return; s.groups.forEach(function(g){g.tile=[237,175];
+    g.items.forEach(function(it){var m=/^Spiderweb(?: (\d+))?$/.exec(it.name); if(m) it.images=[{src:'assets/spiderweb'+(m[1]||1)+'-novo.gif',w:210,h:175,pixel:false}];});
+    g.items.push({name:'Spiderweb 9',href:'#',desc:null,badge:null,images:[{src:'assets/spiderweb9-novo.gif',w:210,h:175,pixel:false}]});});});
+  // Pneuma 1-6: animated GIFs (shrunk, looping copies in assets); 5 and 6 are new items
+  D.sections.forEach(function(s){if(s.id!=='pneuma') return; s.groups.forEach(function(g){g.tile=[211,180];
+    g.items.forEach(function(it){var m=/^Pneuma(?: (\d+))?$/.exec(it.name); if(m) it.images=[{src:'assets/pneuma'+(m[1]||1)+'-novo.gif',w:180,h:180,pixel:false}];});
+    [5,6].forEach(function(n){g.items.push({name:'Pneuma '+n,href:'#',desc:null,badge:null,images:[{src:'assets/pneuma'+n+'-novo.gif',w:180,h:180,pixel:false}]});});});});
+  // Skill Icon Traps: the old still image is replaced by the animated GIF in assets/items
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(s.id==='effectedits'&&it.name==='Skill Icon Traps') it.images=[];});});});
+  // TEYSVault: every download points to google.com for now (real links will come later); RO Cooldown Overlay keeps its real link
+  var DL='https://www.google.com/';
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name!=='RO Cooldown Overlay') it.href=DL;});});});
+  // Cursors: the parent holds no items; its two kinds sit underneath as subtopics
+  (function(){
+    var i=D.sections.findIndex(function(s){return s.id==='cursors';}); if(i<0) return;
+    var c=D.sections[i];
+    D.sections.splice(i+1,0,{id:'cursors-old',title:'Cursor (OLD TIMES)',parent:c.title,note:null,groups:c.groups});
+    c.groups=[];
+    D.sections.forEach(function(s){if(s.id==='cursors2') s.title='Cursor (RENEWAL)';});
+  })();
+  // image slots: items without a preview get a placeholder that picks up assets/items/<slot> when the file exists
+  var slotSeen={};
+  var slot=function(s,it){var f=s.id+'--'+it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    slotSeen[f]=(slotSeen[f]||0)+1; return f+(slotSeen[f]>1?'-'+slotSeen[f]:'')+'.png';};
+  // ---- PT-BR translations (English text -> Portuguese). Edit here to change the Portuguese wording. ----
+  var PT={
+    // categories and groups
+    'Utilities':'Utilitários','Map edits':'Edições de Mapas','Effect edits':'Efeitos','Song edits':'Músicas',
+    'Status effects':'Status Negativos','Tarot cards':'Cartas de Tarô','Spiderweb':'Teia de Aranha','Dispell':'Desencantar','Miscellaneous':'Diversos','Big card sprites':'Cartas grandes',
+    'Cursors':'Cursores','Simplified effects':'Efeitos simplificados','Individual effects':'Efeitos individuais',
+    'Quagmire, hiding and falcons':'Quagmire, Hiding e falcões','Status effect emotes':'Emotes de efeito de status',
+    'Damage numbers':'Números de dano','Miss text':'Texto de Miss','Interface':'Interface','MVPs and WoE':'MVPs e WoE',
+    'Grids':'Grades','Lock-on markers':'Marcadores de mira',
+    // item names
+    'No Trees':'Sem Árvores','No Water':'Sem Água','Extra Zoom':'Zoom Extra','Mini-maps':'Minimapas',
+    'Simplified Effects V5':'Efeitos Simplificados V5','Simplified Effects V6':'Efeitos Simplificados V6',
+    'Small Sight/Ruwach':'Sight/Ruwach Pequeno','No Casting Circles':'Sem Círculos de Conjuração',
+    'High Visibility Traps':'Armadilhas de Alta Visibilidade','High Visibility Traps 2':'Armadilhas de Alta Visibilidade 2',
+    'Rare MVP':'MVP Raro','Skill Icon Traps':'Armadilhas com Ícone de Skill','Subtle Aura':'Aura Sutil',
+    'Strip Effects Pack':'Pacote de Efeitos de Strip','Stat Boost Status Icons Pack':'Pacote de Ícones de Buff de Atributos',
+    'Priest Effects Pack':'Pacote de Efeitos de Sacerdote','Priest Effects Pack 2':'Pacote de Efeitos de Sacerdote 2',
+    'Simplified Soul Link':'Soul Link Simplificado','Block Quagmire':'Quagmire em Blocos','Labeled Quagmire':'Quagmire com Nome',
+    'Hide Arrow 1':'Seta de Hiding 1','Hide Arrow 2':'Seta de Hiding 2','No Hide Effect':'Sem Efeito de Hiding','Owl Falcon':'Falcão Coruja',
+    'Short Songs Sound Effects':'Sons de Música Curtos','Silent Songs':'Músicas Silenciosas','Shrunken Gem Song':'Música com Gemas Menores',
+    'Block Songs':'Músicas em Blocos','Alternative Fortune Kiss':'Fortune Kiss Alternativo','Alternative Fortune Kiss 2':'Fortune Kiss Alternativo 2',
+    'Text Status Effects':'Efeitos de Status em Texto','Text Status Effects 2':'Efeitos de Status em Texto 2',
+    'Text Status Effects 3':'Efeitos de Status em Texto 3','Text Status Effects 4':'Efeitos de Status em Texto 4',
+    'Silence':'Silêncio','Silence 2':'Silêncio 2','Confusion':'Confusão','No Hats':'Sem Chapéus',
+    'No Pet and Monster Talk':'Sem Falas de Pets e Monstros','Baby Warg':'Warg Filhote','Baby Warg 2':'Warg Filhote 2',
+    'Baby falcons':'Falcões Filhotes','Invisible Sprite Marble':'Sprite Marble Invisível','Big Tombstone':'Lápide Grande',
+    'Tiny Damage Numbers':'Números de Dano Minúsculos','No Damage Numbers':'Sem Números de Dano','Rainbow Damage Numbers':'Números de Dano Arco-íris',
+    'Small Miss Text':'Miss Pequeno','Dots Miss Text':'Miss em Pontos','Fail Miss Text':'Miss "FAIL"','Nope Miss Text':'Miss "NOPE"',
+    'Blank Miss Text':'Sem Texto de Miss','Square Menu':'Menu Quadrado','Big MVPs (lua)':'MVPs Grandes (lua)','Arrowed MVPs':'MVPs com Seta',
+    'Small Slaves':'Lacaios Pequenos','Big MVPs with elements (no lua)':'MVPs Grandes com Elemento (sem lua)',
+    'No Animation Monsters':'Monstros sem Animação','Small WoE-Stones':'Pedras de WoE Pequenas','Alternate Barricade':'Barricada Alternativa',
+    'White Cursor w/ Box Around Target':'Cursor Branco com Caixa no Alvo','Super Big Card':'Carta Super Grande',
+    // grid names: base word, a trailing number is kept
+    'Tarot Cards':'Cartas de Tarô','Big Card':'Carta Grande','Alternate Grid':'Grade Alternativa','Lockon':'Mira',
+    'Black':'Preto','Blue':'Azul','Dark Purple':'Roxo Escuro','Full green':'Verde Cheio','Green':'Verde','Light Blue':'Azul Claro',
+    'Orange':'Laranja','Pink':'Rosa','Purple':'Roxo','Red':'Vermelho','Teal':'Azul-petróleo','Violet':'Violeta','White':'Branco','Yellow':'Amarelo',
+    // descriptions
+    'Removes all bushes and trees':'Remove todos os arbustos e árvores',
+    'Removes all water in-game':'Remove toda a água do jogo',
+    "Keeps only: LP, Pneuma, SW, Sanc, Warp Portals, Traps, Strings, SP Song, Slow Song, CP/Loki's, Sight & Ruwach, Monk Spheres, Quagmire":"Mantém só: LP, Pneuma, SW, Sanc, Portais de Warp, Armadilhas, Strings, SP Song, Slow Song, CP/Loki's, Sight e Ruwach, Esferas de Monge, Quagmire",
+    'Keeps only: Warp Portals, Traps, Sight & Ruwach, Monk Spheres':'Mantém só: Portais de Warp, Armadilhas, Sight e Ruwach, Esferas de Monge',
+    'Merge first':'Mescle primeiro',
+    'Makes the sight/ruwach effect smaller':'Deixa o efeito de Sight/Ruwach menor',
+    'Ankle Snare and SP trap are neon green.':'Ankle Snare e a armadilha de SP ficam verde-neon.',
+    'Ankle Snare and SP trap are white.':'Ankle Snare e a armadilha de SP ficam brancas.',
+    'MVP effect says Rare now.':'O efeito de MVP agora diz Rare.',
+    'Traps show as skill icons on the ground.':'As armadilhas aparecem no chão como ícones de skill.',
+    'Not as blinding as most auras':'Não ofusca como a maioria das auras',
+    'Makes original effect more opaque and visible.':'Deixa o efeito original mais opaco e visível.',
+    'No dust, no arrow, just blank':'Sem poeira, sem seta, nada',
+    'Bard/Dancer songs shortened to a few seconds. Contains common woe songs.':'Músicas de Bardo/Odalisca encurtadas para poucos segundos. Inclui as músicas comuns de WoE.',
+    'Bard/Dancer songs silenced.':'Músicas de Bardo/Odalisca sem som.',
+    'Makes the gems in the effect smaller. Does not affect actual gem items.':'Deixa as gemas do efeito menores. Não muda os itens de gema.',
+    "Changes the images used for Bragi, Idun, Service for You, and Fortune's kiss.":"Troca as imagens de Bragi, Idun, Service for You e Fortune's Kiss.",
+    'Overlays text on top of the character.':'Mostra um texto em cima do personagem.',
+    'No hats will be displayed on any character.':'Nenhum chapéu aparece em nenhum personagem.',
+    'No more chat spam!':'Chega de spam no chat!',
+    'Shrinks Warg to 50% size.':'Diminui o Warg para 50% do tamanho.',
+    'More warg shrinkage. More complete.':'Diminui ainda mais o Warg. Mais completo.',
+    'Small falcons':'Falcões pequenos',
+    'Removes the Cat Ghosts from your character.':'Remove os Cat Ghosts do seu personagem.',
+    'Makes tombstone bigger.':'Deixa a lápide maior.',
+    'Text when missing is smaller.':'O texto de Miss fica menor.',
+    'Text when missing is "....".':'O texto de Miss vira "....".',
+    'Text when missing is "FAIL".':'O texto de Miss vira "FAIL".',
+    'Text when missing is "NOPE".':'O texto de Miss vira "NOPE".',
+    'No miss text at all.':'Sem nenhum texto de Miss.',
+    'Uses the new menu icons from kro under the exp window.':'Usa os ícones novos de menu do kRO embaixo da janela de EXP.',
+    'Makes certain MVPs/mini-bosses bigger. Uses a lua file to adjust bio3 monsters. May cause errors on servers with custom lua files.':'Deixa alguns MVPs/mini-chefes maiores. Usa um arquivo lua para ajustar os monstros do Bio3. Pode dar erro em servidores com lua personalizado.',
+    'Makes certain MVPs/mini-bosses bigger. Has no lua files, should work on majority of servers.':'Deixa alguns MVPs/mini-chefes maiores. Sem arquivos lua, deve funcionar na maioria dos servidores.',
+    'Makes certain MVPs/mini-bosses have a giant arrow over them.':'Coloca uma seta gigante em cima de alguns MVPs/mini-chefes.',
+    'Shrinks the slaves of certain MVPs or mini-bosses.':'Diminui os lacaios de alguns MVPs ou mini-chefes.',
+    'Big MVPs with their element. Lua-less. By Ed':'MVPs grandes com o elemento deles. Sem lua. Por Ed',
+    "Monsters have no animations. If you're going to use the MVP edit too, you'll need to use that one second.":'Monstros sem animação. Se for usar a edição de MVP também, aplique ela depois desta.',
+    'Shrinks flags, stones, emps, etc. Prevents players hiding under them. Includes alternate barricade below.':'Diminui bandeiras, pedras, emperium etc. Impede que jogadores se escondam embaixo deles. Inclui a barricada alternativa abaixo.'
+  };
+  var UI={en:{dl:'Download',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
+    'pt-BR':{dl:'Baixar',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
+  // English names shown for some categories (the left side stays as in data.js)
+  var EN={'Map edits':'Map Edits','Effect edits':'Effects','Song edits':'Songs','Status effects':'Negative Status','Tarot cards':'Tarot Cards'};
+  var isPT=false;
+  // tr(): the text in the current language. Numbered names ("Big Card 4") translate the base and keep the number.
+  var tr=function(t){if(t==null) return t; if(!isPT) return EN[t]!=null?EN[t]:t; if(PT[t]!=null) return PT[t];
+    var m=/^(.*?) (\d+)$/.exec(t); return m&&PT[m[1]]!=null?PT[m[1]]+' '+m[2]:t;};
+  // '#' is a placeholder link: stays on the page instead of opening a tab
+  var lnk=function(it){return it.href==='#'?' onclick="return false" title="'+UI[isPT?'pt-BR':'en'].soon+'"':' target="_blank" rel="noopener"';};
+  var own=function(s){return s.groups.reduce(function(n,g){return n+g.items.length;},0);};
+  var count=function(s){var n=own(s); if(n||s.parent) return n;
+    return D.sections.reduce(function(t,k){return t+(k.parent===s.title?own(k):0);},0);};
+
+  // category icons (from the Imagens folder; Cursors uses the RO cursor itself)
+  var ICONS={restart:A+'assets/icons-cat/Exclamacao.png',mapedits:A+'assets/icons-cat/Papiro1.png',effectedits:A+'assets/icons-cat/Star1.png',
+    miscedits:A+'assets/icons-cat/Prinny.png',bigcards:A+'assets/icons-cat/bau.png',cursors:A+'cursor/ro-cursor-0.png'};
+  var qtext=function(a){var out=[];a.forEach(function(t){if(!t) return; out.push(t); var w=isPT; isPT=true; out.push(tr(t)); isPT=false; out.push(tr(t)); isPT=w;});
+    return out.join(' ').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');};
+  // the list and the sections are drawn again when the language changes
+  function build(){ slotSeen={};
+  // nav tree: children nest under their parent
+  var nav='';
+  D.sections.forEach(function(s){
+    if(s.parent) return;
+    var kids=D.sections.filter(function(k){return k.parent===s.title;});
+    var ic=ICONS[s.id];
+    nav+='<li><a href="#'+s.id+'">'+(ic?'<span class="ic" aria-hidden="true"><img src="'+ic+'" alt="" width="26" height="26"></span>':'')+'<span class="t">'+esc(tr(s.title))+'</span><span class="n">'+count(s)+'</span></a>';
+    if(kids.length) nav+='<ul>'+kids.map(function(k){return '<li><a href="#'+k.id+'"><span class="dot" aria-hidden="true"><img src="'+A+'assets/icons-cat/dot.png" alt="" width="15" height="12"></span><span class="t">'+esc(tr(k.title))+'</span><span class="n">'+count(k)+'</span></a></li>';}).join('')+'</ul>';
+    nav+='</li>';
+  });
+  document.getElementById('nav').innerHTML=nav;
+
+  // sections
+  var html='';
+  D.sections.forEach(function(s){
+    html+='<section class="sec" id="'+s.id+'" data-sec><div class="sec-h"><span class="mark" aria-hidden="true"></span><h2>'+(s.parent?'<span class="crumb">'+esc(tr(s.parent))+' / </span>':'')+esc(tr(s.title))+'</h2><span class="n">'+count(s)+'</span></div>';
+    if(s.note) html+='<p class="sec-note">'+esc(tr(s.note))+'</p>';
+    s.groups.forEach(function(g){
+      html+='<div class="grp" data-grp>'+(g.title?'<h3>'+esc(tr(g.title))+'</h3>':'')+(g.note?'<p>'+esc(tr(g.note))+'</p>':'');
+      if(g.kind==='grid'){
+        html+='<ul class="grid" style="--tw:'+Math.max(120,g.tile[0])+'px;--th:'+g.tile[1]+'px">';
+        g.items.forEach(function(it){var im=it.images[0]||{};
+          html+='<li class="tile" data-q="'+esc(qtext([it.name,s.title,s.parent]))+'"><a href="'+esc(it.href)+'" target="_blank" rel="noopener" aria-label="'+UI[isPT?'pt-BR':'en'].dl+' '+esc(tr(it.name))+'"><span class="img"><img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'></span>'+esc(tr(it.name))+'</a></li>';});
+        html+='</ul>';
+      } else {
+        html+='<ul class="list">';
+        g.items.forEach(function(it){
+          html+='<li class="item" data-q="'+esc(qtext([it.name,it.desc,s.title,g.title]))+'"><div class="item-main"><a class="item-name" href="'+esc(it.href)+'"'+lnk(it)+'>'+esc(tr(it.name))+'</a>'+(it.badge?'<span class="badge">'+esc(tr(it.badge))+'</span>':'')+(it.desc?'<p class="item-desc">'+esc(tr(it.desc))+'</p>':'');
+          if(!it.images.length){var f=slot(s,it);
+            html+='<div class="ph" data-slot="'+f+'"><img src="'+A+'assets/items/'+f+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async" onload="this.parentNode.classList.add(&quot;has&quot;)" onerror="if(/.png$/.test(this.src))this.src=this.src.replace(/.png$/,&quot;.gif&quot;);else this.remove()"><span class="ph-in" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/></svg><span class="ph-t"></span></span></div>';}
+          if(it.images.length) html+='<div class="item-imgs">'+it.images.map(function(im){return '<img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'>';}).join('')+'</div>';
+          html+='</div><a class="dl" href="'+esc(it.href)+'"'+lnk(it)+' aria-label="'+UI[isPT?'pt-BR':'en'].dl+' '+esc(tr(it.name))+'">'+ICON+'</a></li>';});
+        html+='</ul>';
+      }
+      if(g.figure) html+='<figure class="fig"><img src="'+A+esc(g.figure.src)+'" width="'+g.figure.w+'" height="'+g.figure.h+'" alt="'+esc(g.figure.alt)+'" loading="lazy"></figure>';
+      html+='</div>';
+    });
+    html+='</section>';
+  });
+  document.getElementById('secs').innerHTML=html;
+  }
+
+  // install guide, bilingual
+  var T={en:{h:'DISCLAIMER',prev:'Previous',next:'Next',close:'Close',reopen:'Show disclaimer',of:' of ',link:'GRFEditor (by Tokeiburu) on GitHub',change:'Change it to:',now:'Current:'},
+         'pt-BR':{h:'AVISO',prev:'Anterior',next:'Próximo',close:'Fechar',reopen:'Mostrar aviso',of:' de ',link:'GRFEditor (by Tokeiburu) no GitHub',change:'Mude para:',now:'Atual:'}};
+  var page=0, lang='en', closed=false;
+  function draw(focus){var t=T[lang],P=D.disclaimer[lang],p=P[page],g=document.getElementById('guide');
+    g.classList.toggle('closed',closed);
+    g.innerHTML='<p class="npc-name" id="g-h">'+t.h+'<small>TEYS</small></p>'+
+      '<div class="npc-page" aria-live="polite">'+p.text.map(function(x){return '<p>'+esc(x)+'</p>';}).join('')+
+        (p.steps?'<ol>'+p.steps.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ol>':'')+
+        (p.link?'<p><a href="'+p.link+'" target="_blank" rel="noopener">'+t.link+'</a></p>':'')+
+        (p.before?'<div class="npc-ini"><div><p class="sub">'+t.now+'</p><pre>'+esc(p.before)+'</pre></div><div><p class="sub">'+t.change+'</p><pre>'+esc(p.after)+'</pre></div></div>':'')+'</div>'+
+      '<div class="npc-actions"><span class="npc-dots">'+(page+1)+t.of+P.length+'</span>'+
+        '<button type="button" class="npc-btn" data-npc="prev"'+(page===0?' disabled':'')+'>'+t.prev+'</button>'+
+        '<button type="button" class="npc-btn primary" data-npc="next"'+(page===P.length-1?' disabled':'')+'>'+t.next+'</button>'+
+        '<button type="button" class="npc-btn" data-npc="close">'+t.close+'</button></div>'+
+      '<button type="button" class="npc-btn npc-reopen" data-npc="reopen">'+t.reopen+'</button>';
+    if(focus){var b=g.querySelector('[data-npc="'+focus+'"]'); if(b&&b.disabled) b=g.querySelector('[data-npc="'+(focus==='next'?'prev':'next')+'"]'); if(b) b.focus();}
+  }
+  document.getElementById('guide').addEventListener('click',function(e){var b=e.target.closest('[data-npc]'); if(!b) return; var a=b.dataset.npc, n=D.disclaimer[lang].length;
+    if(a==='next'){page=Math.min(page+1,n-1);draw('next');}
+    else if(a==='prev'){page=Math.max(page-1,0);draw('prev');}
+    else if(a==='close'){closed=true;draw('reopen');}
+    else if(a==='reopen'){closed=false;page=0;draw('next');}
+  });
+  function guide(l){lang=l; isPT=l==='pt-BR'; draw(); build(); afterBuild();
+    var u=UI[l]; document.querySelector('.skip').textContent=u.skip; document.querySelector('nav.cats').setAttribute('aria-label',u.cats);
+    document.querySelector('.search .sr').textContent=u.search; document.getElementById('empty').textContent=u.empty; document.getElementById('foot').textContent=u.foot;
+    document.documentElement.lang=l==='pt-BR'?'pt-BR':'en';
+    document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.lang===l);});
+    try{localStorage.setItem('grf-lang',l);}catch(e){}
+  }
+  document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',function(){guide(b.dataset.lang);});});
+
+  // search
+  var q=document.getElementById('q'), items=[];
+  function run(){var v=q.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''),n=0;
+    items.forEach(function(el){var hit=!v||el.dataset.q.indexOf(v)>-1;el.hidden=!hit;if(hit)n++;});
+    document.querySelectorAll('[data-grp]').forEach(function(g){g.hidden=!!v&&!g.querySelector('[data-q]:not([hidden])');});
+    document.querySelectorAll('[data-sec]').forEach(function(s){s.hidden=!!v&&!s.querySelector('[data-q]:not([hidden])');});
+    document.getElementById('guide').hidden=!!v; document.getElementById('empty').hidden=!v||n>0;}
+  q.addEventListener('input',run);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}
+    if(e.key==='Escape'&&document.activeElement===q){q.value='';run();}});
+
+  // current category (wired again after every rebuild)
+  var links={}, io=null;
+  function afterBuild(){
+    items=[].slice.call(document.querySelectorAll('[data-q]')); if(q.value) run();
+    links={}; document.querySelectorAll('.cats a').forEach(function(a){links[a.getAttribute('href').slice(1)]=a;});
+    if(!('IntersectionObserver' in window)) return;
+    if(io) io.disconnect();
+    io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)
+      Object.keys(links).forEach(function(k){links[k].classList.toggle('on',k===e.target.id);});});},{rootMargin:'-20% 0px -70% 0px'});
+    document.querySelectorAll('[data-sec]').forEach(function(s){io.observe(s);});}
+  var saved='en'; try{saved=localStorage.getItem('grf-lang')||'en';}catch(e){} guide(saved==='pt-BR'?'pt-BR':'en');
+})();
+// Clickable character (bottom right). Swap in your own files here: put them in assets/mascote/ and fill the names.
+// While a field is null, the page uses the base image with an animation and a built-in sound instead.
+(function(){
+  var M={
+    normal:'assets/mascote/normal.png',
+    clique:'assets/mascote/clique.png',   // image shown for a moment on each click
+    especial:'assets/mascote/especial.png', // image shown on every 5th click
+    somClique:'assets/mascote/clique.mp3', // sound on each click
+    somEspecial:'assets/mascote/especial.mp3', // sound on every 5th click
+    vezes:5             // clicks needed for the special one
+  };
+  var b=document.createElement('button'); b.type='button'; b.className='mascote';
+  var img=new Image(); img.src=M.normal; img.alt=''; img.decoding='async'; b.appendChild(img);
+  function label(){b.setAttribute('aria-label',document.documentElement.lang==='pt-BR'?'Personagem: clique nela':'Character: click her');}
+  label(); document.querySelectorAll('.lang button').forEach(function(x){x.addEventListener('click',label);});
+  document.body.appendChild(b);
+  [M.clique,M.especial].forEach(function(u){if(u){var p=new Image();p.src=u;}}); // preload
+  var ctx=null;
+  function tone(notes){ // fallback sound made in the browser: list of [frequency, start, length]
+    try{ctx=ctx||new (window.AudioContext||window.webkitAudioContext)();}catch(e){return;}
+    var t0=ctx.currentTime;
+    notes.forEach(function(n){var o=ctx.createOscillator(),g=ctx.createGain(); o.type='triangle';
+      o.frequency.setValueAtTime(n[0],t0+n[1]); if(n[3]) o.frequency.exponentialRampToValueAtTime(n[3],t0+n[1]+n[2]);
+      g.gain.setValueAtTime(0.0001,t0+n[1]); g.gain.exponentialRampToValueAtTime(0.18,t0+n[1]+0.015); g.gain.exponentialRampToValueAtTime(0.0001,t0+n[1]+n[2]);
+      o.connect(g).connect(ctx.destination); o.start(t0+n[1]); o.stop(t0+n[1]+n[2]+0.02);});
+  }
+  function play(file,fallback){ if(file){var a=new Audio(file); a.volume=.7; a.play().catch(function(){tone(fallback);});} else tone(fallback); }
+  var n=0, back=null;
+  function show(src,cls,ms){ clearTimeout(back); if(src) img.src=src;
+    b.classList.remove('boop','especial'); void b.offsetWidth; b.classList.add(cls);
+    back=setTimeout(function(){img.src=M.normal; b.classList.remove(cls);},ms); }
+  function hearts(){var r=b.getBoundingClientRect(); for(var i=0;i<6;i++){var h=document.createElement('span'); h.className='mascote-heart'; h.textContent='♥';
+    h.style.left=(r.left+r.width/2-10+(Math.random()*40-20))+'px'; h.style.top=(r.top+r.height*.25)+'px'; h.style.setProperty('--dx',(Math.random()*120-60)+'px');
+    h.style.animationDelay=(i*60)+'ms'; document.body.appendChild(h); setTimeout(h.remove.bind(h),1100+i*60);}}
+  b.addEventListener('click',function(){ n++;
+    if(n%M.vezes===0){ show(M.especial,'especial',1400); play(M.somEspecial,[[523,0,.12],[659,.1,.12],[784,.2,.12],[1047,.3,.35]]); hearts(); }
+    else { show(M.clique,'boop',380); play(M.somClique,[[440,0,.12,880]]); }
+  });
+})();
+// Corner art: a different one of the seven on every reload (never the same twice in a row on this browser)
+(function(){
+  var n=7, last=-1; try{last=+localStorage.getItem('grf-art');}catch(e){}
+  var i=Math.floor(Math.random()*n); if(n>1&&i===last) i=(i+1+Math.floor(Math.random()*(n-1)))%n;
+  try{localStorage.setItem('grf-art',i);}catch(e){}
+  var img=new Image(); img.className='corner-art'; img.alt=''; img.setAttribute('aria-hidden','true'); img.decoding='async';
+  img.src='assets/art/art'+(i+1)+'.png'; img.onerror=function(){img.hidden=true;};
+  document.body.appendChild(img);
+})();
+// Search placeholder: full text on wide screens, one word on phones, in the chosen language
+(function(){
+  var q=document.getElementById('q'), mq=window.matchMedia('(max-width:560px)');
+  function ph(){var pt=document.documentElement.lang==='pt-BR';
+    q.placeholder=pt?'Buscar':'Search';}
+  document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',ph);});
+  if(mq.addEventListener) mq.addEventListener('change',ph); ph();
+})();
+// Animated Ragnarok Online cursor, drawn on the page so it animates in every browser (same as the original site)
+(function(){
+  if(!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return; // touch screens have no cursor
+  var root=document.documentElement, c=document.createElement('div');
+  c.id='ro-cursor'; c.setAttribute('aria-hidden','true'); document.body.appendChild(c);
+  var strip=new Image(); strip.onload=function(){root.classList.add('ro-cur');}; strip.src='cursor/ro-cursor-strip.png';
+  var x=-100,y=-100,queued=false;
+  function draw(){queued=false; c.style.transform='translate('+x+'px,'+y+'px)';}
+  document.addEventListener('pointermove',function(ev){
+    if(ev.pointerType!=='mouse') return;
+    x=ev.clientX; y=ev.clientY; root.classList.add('ro-in');
+    root.classList.toggle('ro-text', !!(ev.target.matches && ev.target.matches('input[type=search]')));
+    if(!queued){queued=true; requestAnimationFrame(draw);}
+  },{passive:true});
+  document.addEventListener('pointerleave',function(){root.classList.remove('ro-in');});
+  document.documentElement.addEventListener('mouseleave',function(){root.classList.remove('ro-in');});
+  window.addEventListener('blur',function(){root.classList.remove('ro-in');});
+})();
+</script>
+</body>
+</html>
