@@ -160,17 +160,25 @@ nav.cats{position:sticky;top:90px;align-self:start;max-height:calc(100vh - 110px
 .item-desc{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
 .item-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .item-imgs img{max-width:100%;height:auto;border-radius:4px;background:#0a111d}
+/* Cursor (RENEWAL) list cards line up with the cursor tiles above and are two tiles wide */
+#cursors2 .list{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+#cursors2 .list .item{grid-column:span 2}
+#cursors2 .item-imgs{align-items:center;gap:10px}
+#cursors2 .item-imgs img{background:none;border-radius:0}
 .ph{margin-top:8px;width:100%;max-width:320px;aspect-ratio:16/9;border-radius:6px;overflow:hidden;position:relative;background:#0a111d}
 .ph img{display:block;width:100%;height:100%;object-fit:contain}
 .ph.has{background:#000}
+/* this cursor shows at its real size on a transparent background, like the cursor tiles */
+.ph.has[data-slot="cursors2--white-cursor-w-box-around-target.png"]{background:none;aspect-ratio:auto;width:auto;max-width:none;overflow:visible}
+.ph[data-slot="cursors2--white-cursor-w-box-around-target.png"] img{image-rendering:pixelated;width:22px;height:31px;object-fit:none}
 .ph[data-slot="effectedits--skill-icon-traps.png"] img{image-rendering:pixelated;position:absolute;inset:0;margin:auto;width:96px;height:96px}
 .ph:not(.has) img{position:absolute;opacity:0}
 .ph.has .ph-in{display:none}
 .ph-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(255,255,255,.018) 10px 20px)}
 .ph-in svg{width:28px;height:28px;opacity:.7}
 .ph-t{font-size:12.5px}
-.ph-t::before{content:"Image coming soon"}
-html[lang="pt-BR"] .ph-t::before{content:"Imagem em breve"}
+.ph-t::before{content:"TBA - Soon"}
+html[lang="pt-BR"] .ph-t::before{content:"Em breve"}
 .badge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;background:var(--accent);color:var(--accent-ink);vertical-align:2px}
 .dl{flex:none;display:inline-grid;place-items:center;width:40px;height:40px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line-2);color:var(--ink)}
 .dl:hover{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -276,6 +284,19 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // Tarot Cards 11: new item, GIF built from the client's tarot01-14.tga (1 s per card)
   D.sections.forEach(function(s){if(s.id!=='tarotcard') return; s.groups.forEach(function(g){
     g.items.push({name:'Tarot Cards 11',href:'#',desc:null,badge:null,images:[{src:'assets/tarot_cards11.gif',w:85,h:170,pixel:false}]});});});
+  // White Cursor w/ Box Around Target: the cursor GIF and the target-box GIF side by side, real size, transparent
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name!=='White Cursor w/ Box Around Target') return; it.name='Cursor w/ Box 1';
+    it.images=[{src:'assets/items/cursors2--white-cursor-w-box-around-target.gif',w:22,h:31,pixel:true},{src:'assets/items/cursors2--white-cursor-box-target.gif',w:56,h:100,pixel:true}];});});});
+  // Cursor w/ Box 2-16: one item per RENEWAL cursor color (grid order), cursor GIF + box recolored from cursors0006.bmp (fontes/cursor-box)
+  D.sections.forEach(function(s){if(s.id!=='cursors2') return; s.groups.forEach(function(g){
+    var i=g.items.findIndex(function(it){return it.name==='Cursor w/ Box 1';}); if(i<0) return;
+    ['Black','Blue','Blue2','Dark_Purple','Green','Light_Blue','Orange','Pink','Pink2','Purple','Red','Red2','Teal','Violet','Yellow'].forEach(function(c,k){
+      g.items.splice(i+1+k,0,{name:'Cursor w/ Box '+(k+2),href:'#',desc:null,badge:null,images:[{src:'assets/CursorNew_'+c+'.gif',w:22,h:31,pixel:true},{src:'assets/items/cursors2--box-'+c+'.png',w:56,h:100,pixel:true}]});});});});
+  // Stat Boost Status Icons Pack 2: new item right after pack 1, icons from the client's *_gogi.tga (magenta made transparent)
+  D.sections.forEach(function(s){s.groups.forEach(function(g){
+    var i=g.items.findIndex(function(it){return it.name==='Stat Boost Status Icons Pack';}); if(i<0) return;
+    g.items.splice(i+1,0,{name:'Stat Boost Status Icons Pack 2',href:'#',desc:null,badge:null,
+      images:['agi','dex','int','luk','str','vit'].map(function(k){return {src:'assets/'+k+'_gogi2.png',w:64,h:64,pixel:true};})});});});
   // Skill Icon Traps: the old still image is replaced by the animated GIF in assets/items
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(s.id==='effectedits'&&it.name==='Skill Icon Traps') it.images=[];});});});
   // TEYSVault: every download points to google.com for now (real links will come later); RO Cooldown Overlay keeps its real link
@@ -291,6 +312,15 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   })();
   // image slots: items without a preview get a placeholder that picks up assets/items/<slot> when the file exists
   var slotSeen={};
+  // items without a photo yet: listed by their photo slot; remove a line here when the item gets its photo and real text back
+  var TBA=['effectedits--simplified-effects-v5','effectedits--simplified-effects-v6','effectedits--small-sight-ruwach','effectedits--no-casting-circles',
+    'effectedits--high-visibility-traps','effectedits--high-visibility-traps-2','effectedits--rare-mvp','effectedits--stone-curse-1','effectedits--no-hide-effect',
+    'songs--short-songs-sound-effects','songs--silent-songs','songs--shrunken-gem-song',
+    'miscedits--no-hats','miscedits--no-pet-and-monster-talk','miscedits--baby-warg','miscedits--baby-warg-2','miscedits--baby-falcons',
+    'miscedits--invisible-sprite-marble','miscedits--big-tombstone','miscedits--tiny-damage-numbers','miscedits--no-damage-numbers',
+    'miscedits--rainbow-damage-numbers','miscedits--small-miss-text','miscedits--dots-miss-text','miscedits--fail-miss-text','miscedits--nope-miss-text',
+    'miscedits--blank-miss-text','miscedits--big-mvps-lua','miscedits--big-mvps-lua-2','miscedits--arrowed-mvps','miscedits--small-slaves',
+    'miscedits--big-mvps-with-elements-no-lua','miscedits--no-animation-monsters','miscedits--small-woe-stones'].map(function(x){return x+'.png';});
   var slot=function(s,it){var f=s.id+'--'+it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
     slotSeen[f]=(slotSeen[f]||0)+1; return f+(slotSeen[f]>1?'-'+slotSeen[f]:'')+'.png';};
   // ---- PT-BR translations (English text -> Portuguese). Edit here to change the Portuguese wording. ----
@@ -308,7 +338,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Small Sight/Ruwach':'Sight/Ruwach Pequeno','No Casting Circles':'Sem Círculos de Conjuração',
     'High Visibility Traps':'Armadilhas de Alta Visibilidade','High Visibility Traps 2':'Armadilhas de Alta Visibilidade 2',
     'Rare MVP':'MVP Raro','Skill Icon Traps':'Armadilhas com Ícone de Skill','Subtle Aura':'Aura Sutil',
-    'Strip Effects Pack':'Pacote de Efeitos de Strip','Stat Boost Status Icons Pack':'Pacote de Ícones de Buff de Atributos',
+    'Strip Effects Pack':'Pacote de Efeitos de Strip','Stat Boost Status Icons Pack':'Pacote de Ícones de Buff de Atributos','Stat Boost Status Icons Pack 2':'Pacote de Ícones de Buff de Atributos 2','TBA - Soon':'Em breve',
     'Priest Effects Pack':'Pacote de Efeitos de Sacerdote','Priest Effects Pack 2':'Pacote de Efeitos de Sacerdote 2',
     'Simplified Soul Link':'Soul Link Simplificado','Block Quagmire':'Quagmire em Blocos','Labeled Quagmire':'Quagmire com Nome',
     'Hide Arrow 1':'Seta de Hiding 1','Hide Arrow 2':'Seta de Hiding 2','No Hide Effect':'Sem Efeito de Hiding','Owl Falcon':'Falcão Coruja',
@@ -324,7 +354,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Blank Miss Text':'Sem Texto de Miss','Square Menu':'Menu Quadrado','Big MVPs (lua)':'MVPs Grandes (lua)','Arrowed MVPs':'MVPs com Seta',
     'Small Slaves':'Lacaios Pequenos','Big MVPs with elements (no lua)':'MVPs Grandes com Elemento (sem lua)',
     'No Animation Monsters':'Monstros sem Animação','Small WoE-Stones':'Pedras de WoE Pequenas','Alternate Barricade':'Barricada Alternativa',
-    'White Cursor w/ Box Around Target':'Cursor Branco com Caixa no Alvo','Super Big Card':'Carta Super Grande',
+    'Super Big Card':'Carta Super Grande',
     // grid names: base word, a trailing number is kept
     'Tarot Cards':'Cartas de Tarô','Big Card':'Carta Grande','Alternate Grid':'Grade Alternativa','Lockon':'Mira',
     'Black':'Preto','Blue':'Azul','Dark Purple':'Roxo Escuro','Full green':'Verde Cheio','Green':'Verde','Light Blue':'Azul Claro',
@@ -369,6 +399,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     "Monsters have no animations. If you're going to use the MVP edit too, you'll need to use that one second.":'Monstros sem animação. Se for usar a edição de MVP também, aplique ela depois desta.',
     'Shrinks flags, stones, emps, etc. Prevents players hiding under them. Includes alternate barricade below.':'Diminui bandeiras, pedras, emperium etc. Impede que jogadores se escondam embaixo deles. Inclui a barricada alternativa abaixo.'
   };
+  for(var cb=1;cb<=16;cb++) PT['Cursor w/ Box '+cb]='Cursor com Caixa '+cb;
   var UI={en:{dl:'Download',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
     'pt-BR':{dl:'Baixar',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
   // English names shown for some categories (the left side stays as in data.js)
@@ -417,8 +448,11 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
       } else {
         html+='<ul class="list">';
         g.items.forEach(function(it){
+          var f=it.images.length?null:slot(s,it);
+          // items still waiting for a photo show "TBA - Soon" / "Em breve" as title and description (the photo slot keeps the real name)
+          if(f&&TBA.indexOf(f)>=0) it={name:'TBA - Soon',desc:'TBA - Soon',badge:null,href:it.href,images:it.images,tba:1};
           html+='<li class="item" data-q="'+esc(qtext([it.name,it.desc,s.title,g.title]))+'"><div class="item-main"><a class="item-name" href="'+esc(it.href)+'"'+lnk(it)+'>'+esc(tr(it.name))+'</a>'+(it.badge?'<span class="badge">'+esc(tr(it.badge))+'</span>':'')+(it.desc?'<p class="item-desc">'+esc(tr(it.desc))+'</p>':'');
-          if(!it.images.length){var f=slot(s,it);
+          if(f){
             html+='<div class="ph" data-slot="'+f+'"><img src="'+A+'assets/items/'+f+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async" onload="this.parentNode.classList.add(&quot;has&quot;)" onerror="if(/.png$/.test(this.src))this.src=this.src.replace(/.png$/,&quot;.gif&quot;);else this.remove()"><span class="ph-in" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/></svg><span class="ph-t"></span></span></div>';}
           if(it.images.length) html+='<div class="item-imgs">'+it.images.map(function(im){return '<img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'>';}).join('')+'</div>';
           html+='</div><a class="dl" href="'+esc(it.href)+'"'+lnk(it)+' aria-label="'+UI[isPT?'pt-BR':'en'].dl+' '+esc(tr(it.name))+'">'+ICON+'</a></li>';});
