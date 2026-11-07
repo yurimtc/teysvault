@@ -302,6 +302,19 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // TEYSVault: every download points to google.com for now (real links will come later); RO Cooldown Overlay keeps its real link
   var DL='https://www.google.com/';
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name!=='RO Cooldown Overlay') it.href=DL;});});});
+  // real downloads: files hosted on the GitHub release "downloads" (yurimtc/teysvault); key = section id + item name, value = file name
+  // to add one: upload the file to that release, then add a line here (spaces in a file name become dots on GitHub)
+  var REL='https://github.com/yurimtc/teysvault/releases/download/downloads/';
+  var FILES={'mapedits|Extra Zoom':'Extra_Zoom.gpf','mapedits|Mini-maps':'MapsRenewal.grf','mapedits|Scale Gray':'GrayScale.grf',
+    'mapedits|Rachel Style':'RachelFloor.grf','mapedits|GrayOrange Scale':'GrayOrangeScale.grf','mapedits|Classic Gray':'Classic.Gray.grf',
+    'mapedits|Sunlight':'Sunlight.grf','mapedits|Moonlight':'Moonlight.grf','mapedits|Niflheim':'Niflheim.grf',
+    'effectedits|Stat Boost Status Icons Pack 2':'BuffIcon2.grf'};
+  [1,2,3,4,5,6,7,8,9,10,11,12,13,14,16].forEach(function(n){FILES['dispell|Dispell '+n]='Dispell'+n+'.grf';});
+  [1,2,3,4,5].forEach(function(n){FILES['lexaeterna|Lex Aeterna '+n]='Lex_Aeterna'+n+'.grf';});
+  [1,2,3,4,5,6].forEach(function(n){FILES['pneuma|Pneuma'+(n>1?' '+n:'')]='Pneuma'+n+'.grf';});
+  [1,2,3,4,5,6,7,8,9].forEach(function(n){FILES['spiderweb|Spiderweb'+(n>1?' '+n:'')]='Spiderweb'+n+'.grf';});
+  [1,2,3,4,5,6,7,8,9,10,11].forEach(function(n){FILES['tarotcard|Tarot Cards'+(n>1?' '+n:'')]='Tarot_Cards'+n+'.grf';});
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){var f=FILES[s.id+'|'+it.name]; if(f) it.href=REL+f;});});});
   // Cursors: the parent holds no items; its two kinds sit underneath as subtopics
   (function(){
     var i=D.sections.findIndex(function(s){return s.id==='cursors';}); if(i<0) return;
