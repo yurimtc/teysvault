@@ -1880,8 +1880,8 @@ window.GRF = {
        "images": [
         {
          "src": "assets/alt_grid.png",
-         "w": 131,
-         "h": 125,
+         "w": 138,
+         "h": 140,
          "pixel": false
         }
        ]
@@ -1894,8 +1894,8 @@ window.GRF = {
        "images": [
         {
          "src": "assets/alt_grid2.png",
-         "w": 130,
-         "h": 125,
+         "w": 138,
+         "h": 140,
          "pixel": false
         }
        ]
@@ -1908,8 +1908,8 @@ window.GRF = {
        "images": [
         {
          "src": "assets/alt_grid3.png",
-         "w": 134,
-         "h": 125,
+         "w": 138,
+         "h": 140,
          "pixel": false
         }
        ]
@@ -1922,8 +1922,8 @@ window.GRF = {
        "images": [
         {
          "src": "assets/alt_grid4.png",
-         "w": 128,
-         "h": 103,
+         "w": 138,
+         "h": 140,
          "pixel": false
         }
        ]
@@ -1936,8 +1936,8 @@ window.GRF = {
        "images": [
         {
          "src": "assets/alt_grid5.png",
-         "w": 32,
-         "h": 32,
+         "w": 138,
+         "h": 140,
          "pixel": false
         }
        ]
@@ -1946,7 +1946,7 @@ window.GRF = {
      "figure": null,
      "tile": [
       166,
-      125
+      140
      ]
     },
     {
