@@ -178,6 +178,8 @@ nav.cats::-webkit-scrollbar{display:none}
 .item-desc{margin:2px 0 0;font-size:13.5px;color:var(--muted)}
 .item-imgs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .item-imgs img{max-width:100%;height:auto;border-radius:4px;background:#0a111d}
+/* groups whose pictures sit centered in the card (Quagmire) */
+.list.center .item-imgs{justify-content:center}
 /* groups shown one card per row */
 .list.one{grid-template-columns:minmax(0,1fr)}
 /* damage numbers: the digit strips all end at the same point (309px wide, Numbers 1 at 36px tall) */
@@ -214,8 +216,18 @@ html[lang="pt-BR"] .ph-t::before{content:"Em breve"}
 @keyframes sel-spin{to{--sel-a:360deg}}
 @keyframes sel-in{from{box-shadow:0 0 0 0 rgba(242,193,78,.55)}to{box-shadow:0 0 0 8px rgba(242,193,78,0)}}
 .item,.tile-in{cursor:pointer;position:relative;transition:border-color .15s}
-/* items that cannot be picked (RO Cooldown Overlay, Square Menu) */
+/* items that cannot be picked */
 .item.nosel{cursor:default}
+/* popup before leaving for the RO Cooldown Overlay project page */
+/* overlay sits under the RO cursor (z-index below #ro-cursor) */
+.go-wrap{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:16px;background:rgba(5,9,16,.65);backdrop-filter:blur(2px)}
+.go-wrap[hidden]{display:none}
+.go-dlg{width:min(420px,calc(100vw - 32px));padding:20px 22px;border:1px solid var(--accent);border-radius:12px;background:var(--panel);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.6);animation:go-in .18s ease-out}
+@keyframes go-in{from{transform:translateY(8px) scale(.98)}}
+.go-h{margin:0 0 6px;font-size:17px;font-weight:700;color:var(--accent)}
+.go-t{margin:0 0 18px;color:#c3cfe2;font-size:14.5px}
+.go-a{display:flex;justify-content:flex-end;gap:8px}
+@media (prefers-reduced-motion:reduce){.go-dlg{animation:none}}
 .item:not(.nosel):hover,.tile-in:hover{border-color:var(--accent)}
 .item:focus-visible,.tile-in:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .item.sel,.tile.sel .tile-in{border-color:var(--accent);color:var(--ink);animation:sel-in .45s ease-out}
@@ -311,6 +323,9 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items=g.items.filter(function(it){return !(s.id==='mapedits'&&['Mini-maps 2','Gray Map','Townless Gray Map','Blue Map'].indexOf(it.name)>=0);});});});
   // groups removed from this model
   D.sections.forEach(function(s){s.groups=s.groups.filter(function(g){return !(s.id==='mapedits'&&g.title==='Tiled flat maps');});});
+  // Miscellaneous: "Miss text" and "Interface" (Square Menu) removed with all their items
+  D.sections.forEach(function(s){if(s.id!=='miscedits') return; s.groups=s.groups.filter(function(g){
+    return !g.items.length||!g.items.every(function(it){return /Miss Text$/.test(it.name)||it.name==='Square Menu';});});});
   D.sections.forEach(function(s){s.groups.forEach(function(g){if(s.id==='mapedits'&&g.title==='GATO Cat flat maps'){g.title='CATO Style';g.figure=null;g.note=null;}});});
   // items added in this model. PLACEHOLDER: troque '#' pelo link do MediaFire quando existir
   D.sections.forEach(function(s){if(s.id!=='mapedits') return; s.groups.forEach(function(g){if(g.title!=='Gray flat maps') return; g.title='GRAY MAPS'; g.note=null;
@@ -343,6 +358,17 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // Tarot Cards 11: new item, GIF built from the client's tarot01-14.tga (1 s per card)
   D.sections.forEach(function(s){if(s.id!=='tarotcard') return; s.groups.forEach(function(g){
     g.items.push({name:'Tarot Cards 11',href:'#',desc:null,badge:null,images:[{src:'assets/tarot_cards11.gif',w:85,h:170,pixel:false}]});});});
+  // Extra Zoom: description under the name, so its picture lines up with the other cards of the row
+  D.sections.forEach(function(s){if(s.id!=='mapedits') return; s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name==='Extra Zoom') it.desc='Removes camera lock';});});});
+  // Effects: "Quagmire, hiding and falcons" becomes three groups in the same section (no new subtopics)
+  D.sections.forEach(function(s){
+    var i=s.groups.findIndex(function(g){return g.title==='Quagmire, hiding and falcons';}); if(i<0) return;
+    var g=s.groups[i], by=function(re){return g.items.filter(function(it){return re.test(it.name);});};
+    var mk=function(title,items){var n={}; for(var k in g) n[k]=g[k]; n.title=title; n.note=null; n.items=items; return n;};
+    // Quagmire: Block / Labeled Quagmire replaced by Quagmire 1-7 (GIFs from Imagens/Quag1-7, cut to every 3rd frame, 85% size, 48 colors)
+    var quag=[1,2,3,4,5,6,7].map(function(n){return {name:'Quagmire '+n,href:'#',desc:null,badge:null,images:[{src:'assets/quagmire'+n+'.gif',w:229,h:212,pixel:false}]};});
+    var qg=mk('Quagmire',quag); qg.center=1;
+    s.groups.splice(i,1,qg,mk('Hiding',by(/^(Hide Arrow \d+|No Hide Effect)$/)),mk('Falcons',by(/Falcon$/)));});
   // Lockon 7-12: new lock-on markers (previews from GRF - SITE/Lock On, resized to 128x128 like the others)
   D.sections.forEach(function(s){s.groups.forEach(function(g){if(!g.items.some(function(it){return it.name==='Lockon';})) return;
     [7,8,9,10,11,12].forEach(function(n){g.items.push({name:'Lockon '+n,href:'#',desc:null,badge:null,images:[{src:'assets/lockon'+n+'.png',w:128,h:128,pixel:false}]});});});});
@@ -395,6 +421,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   [1,2,3,4,5,6,7,8,9,10,11].forEach(function(n){FILES['tarotcard|Tarot Cards'+(n>1?' '+n:'')]='Tarot_Cards'+n+'.grf';});
   [1,2,3,4,5,6,7,8,9,10,11,12].forEach(function(n){FILES['miscedits|Lockon'+(n>1?' '+n:'')]='Lockon'+n+'.grf';});
   [1,2,3,4].forEach(function(n){FILES['miscedits|Numbers '+n]='numbers'+n+'.grf';});
+  [1,2,3,4,5,6,7].forEach(function(n){FILES['effectedits|Quagmire '+n]='Quagmire'+n+'.grf';});
   [1,2,3,4,5].forEach(function(n){FILES['miscedits|Alternate Grid'+(n>1?' '+n:'')]='Alternate_Grid'+n+'.grf';});
   // Cursors (OLD TIMES, section id 'cursors'): item name -> Cursor_<color>.grf; greens/whites matched to their GIFs by color; the Purple files are named Pink2/Pink3 on the release
   var OLDC={'Black':'Black','Blue':'Blue','Blue 2':'Blue2','Dark Purple':'Dark_Purple','Full green':'Green1','Green':'Green2','Green 2':'Green3',
@@ -437,8 +464,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'songs--short-songs-sound-effects','songs--silent-songs','songs--shrunken-gem-song',
     'miscedits--no-hats','miscedits--no-pet-and-monster-talk','miscedits--baby-warg','miscedits--baby-warg-2','miscedits--baby-falcons',
     'miscedits--invisible-sprite-marble','miscedits--big-tombstone',
-    'miscedits--small-miss-text','miscedits--dots-miss-text','miscedits--fail-miss-text','miscedits--nope-miss-text',
-    'miscedits--blank-miss-text','miscedits--big-mvps-lua','miscedits--big-mvps-lua-2','miscedits--arrowed-mvps','miscedits--small-slaves',
+    'miscedits--big-mvps-lua','miscedits--big-mvps-lua-2','miscedits--arrowed-mvps','miscedits--small-slaves',
     'miscedits--big-mvps-with-elements-no-lua','miscedits--no-animation-monsters','miscedits--small-woe-stones'].map(function(x){return x+'.png';});
   var slot=function(s,it){var f=s.id+'--'+it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
     slotSeen[f]=(slotSeen[f]||0)+1; return f+(slotSeen[f]>1?'-'+slotSeen[f]:'')+'.png';};
@@ -448,7 +474,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Utilities':'Utilitários','Map edits':'Edições de Mapas','Effect edits':'Efeitos','Song edits':'Músicas',
     'Status effects':'Status Negativos','Tarot cards':'Cartas de Tarô','Spiderweb':'Teia de Aranha','Dispell':'Desencantar','Miscellaneous':'Diversos','Big card sprites':'Cartas grandes',
     'Cursors':'Cursores','Simplified effects':'Efeitos simplificados','Individual effects':'Efeitos individuais',
-    'Quagmire, hiding and falcons':'Quagmire, Hiding e falcões','Status effect emotes':'Emotes de efeito de status',
+    'Quagmire, hiding and falcons':'Quagmire, Hiding e falcões','Falcons':'Falcões','Removes camera lock':'Remove trava de câmera','Status effect emotes':'Emotes de efeito de status',
     'Damage numbers':'Números de dano','Miss text':'Texto de Miss','Interface':'Interface','MVPs and WoE':'MVPs e WoE',
     'Grids':'Grades','Lock-on markers':'Marcadores de mira',
     // item names
@@ -519,8 +545,8 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Shrinks flags, stones, emps, etc. Prevents players hiding under them. Includes alternate barricade below.':'Diminui bandeiras, pedras, emperium etc. Impede que jogadores se escondam embaixo deles. Inclui a barricada alternativa abaixo.'
   };
   for(var cb=1;cb<=16;cb++) PT['Cursor w/ Box '+cb]='Cursor com Caixa '+cb;
-  var UI={en:{dl:'Download',dlsel:'Download selected',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
-    'pt-BR':{dl:'Baixar',dlsel:'Baixar selecionados',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
+  var UI={en:{gotitle:'Project page',gotext:'You will be taken to the project page of RO Cooldown Overlay on GitHub.',gook:'Go to GitHub',gono:'Cancel',dl:'Download',dlsel:'Download selected',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
+    'pt-BR':{gotitle:'Página do projeto',gotext:'Você será levado para a página do projeto RO Cooldown Overlay no GitHub.',gook:'Ir para o GitHub',gono:'Cancelar',dl:'Baixar',dlsel:'Baixar selecionados',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
   // English names shown for some categories (the left side stays as in data.js)
   var EN={'Map edits':'Map Edits','Effect edits':'Effects','Song edits':'Songs','Status effects':'Negative Status','Tarot cards':'Tarot Cards'};
   var isPT=false;
@@ -535,7 +561,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // 'off' = cannot be picked. Groups may span sections (all cursors; big cards + fake light; gray maps + CATO style).
   var ONE={tarotcard:1,pneuma:1,spiderweb:1,lexaeterna:1,dispell:1};
   var rule=function(sid,n){
-    if((sid==='restart'&&n==='RO Cooldown Overlay')||(sid==='miscedits'&&n==='Square Menu')) return 'off';
+    if(sid==='restart'&&n==='RO Cooldown Overlay') return 'link';
     if(ONE[sid]) return sid;
     if(sid==='bigcards'||sid==='bigcards-light') return 'bigcard';
     if(/^cursors/.test(sid)) return 'cursor';
@@ -545,7 +571,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
       if(/^Stat Boost Status Icons Pack( 2)?$/.test(n)) return 'statboost';
       if(/^Priest Effects Pack( 2)?$/.test(n)) return 'priest';
       if(/^Stone Curse \d+$/.test(n)) return 'stone';
-      if(/^(Block|Labeled) Quagmire$/.test(n)) return 'quag';
+      if(/^Quagmire \d+$/.test(n)) return 'quag';
       if(/^(Hide Arrow \d+|No Hide Effect)$/.test(n)) return 'hide';
       return null;}
     if(sid==='songs') return /^Alternative Fortune Kiss( 2)?$/.test(n)?'fkiss':null;
@@ -553,7 +579,6 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     if(sid==='miscedits'){
       if(/^Baby Warg( 2)?$/.test(n)) return 'warg';
       if(/Damage Numbers$/.test(n)||/^Numbers \d+$/.test(n)) return 'dmg';
-      if(/Miss Text$/.test(n)) return 'miss';
       if(/^Alternate Grid( \d+)?$/.test(n)) return 'grid';
       if(/^Lockon( \d+)?$/.test(n)) return 'lockon';}
     return null;};
@@ -598,12 +623,12 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
           html+='<li class="tile'+(SEL[k]?' sel':'')+'"'+selAt(k,x)+' data-q="'+esc(qtext([it.name,s.title,s.parent]))+'"><button type="button" class="tile-in" aria-pressed="'+!!SEL[k]+'"><span class="img"><img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'></span>'+esc(tr(it.name))+'</button></li>';});
         html+='</ul>';
       } else {
-        html+='<ul class="list'+(g.one?' one':'')+'">';
+        html+='<ul class="list'+(g.one?' one':'')+(g.center?' center':'')+'">';
         g.items.forEach(function(it){
           var f=it.images.length?null:slot(s,it), k=key(s,it), x=rule(s.id,it.name);
           // items still waiting for a photo show "TBA - Soon" / "Em breve" as title and description (the photo slot keeps the real name)
           if(f&&TBA.indexOf(f)>=0) it={name:'TBA - Soon',desc:'TBA - Soon',badge:null,href:it.href,images:it.images,tba:1};
-          html+='<li class="item'+(x==='off'?' nosel"':(SEL[k]?' sel':'')+'"'+selAt(k,x)+' role="button" tabindex="0" aria-pressed="'+!!SEL[k]+'"')+' data-q="'+esc(qtext([it.name,it.desc,s.title,g.title]))+'"><div class="item-main"><span class="item-name">'+esc(tr(it.name))+'</span>'+(it.badge?'<span class="badge">'+esc(tr(it.badge))+'</span>':'')+(it.desc?'<p class="item-desc">'+esc(tr(it.desc))+'</p>':'');
+          html+='<li class="item'+(x==='link'?' go" data-go="'+esc(it.href)+'" role="button" tabindex="0"':x==='off'?' nosel"':(SEL[k]?' sel':'')+'"'+selAt(k,x)+' role="button" tabindex="0" aria-pressed="'+!!SEL[k]+'"')+' data-q="'+esc(qtext([it.name,it.desc,s.title,g.title]))+'"><div class="item-main"><span class="item-name">'+esc(tr(it.name))+'</span>'+(it.badge?'<span class="badge">'+esc(tr(it.badge))+'</span>':'')+(it.desc?'<p class="item-desc">'+esc(tr(it.desc))+'</p>':'');
           if(f){
             html+='<div class="ph" data-slot="'+f+'"><img src="'+A+'assets/items/'+f+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async" onload="this.parentNode.classList.add(&quot;has&quot;)" onerror="if(/.png$/.test(this.src))this.src=this.src.replace(/.png$/,&quot;.gif&quot;);else this.remove()"><span class="ph-in" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 17-5-5-9 8"/></svg><span class="ph-t"></span></span></div>';}
           if(it.images.length) html+='<div class="item-imgs'+(it.row?' row':'')+'">'+it.images.map(function(im){return '<img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="'+esc(tr(it.name))+'" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'>';}).join('')+'</div>';
@@ -630,8 +655,24 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     secs.querySelectorAll('[data-x]').forEach(function(o){o.classList.toggle('dim',!!on[o.dataset.x]&&!o.classList.contains('sel'));});};
   // "download selected" button: only shows the count for now (download not wired yet)
   var selCount=function(){var b=document.getElementById('dl-sel'), n=Object.keys(SEL).length; b.dataset.n=n; b.querySelector('.c').textContent=n;};
-  secs.addEventListener('click',function(e){var li=e.target.closest('[data-k]'); if(li){pick(li); selCount();}});
-  secs.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches('.item[data-k]')){e.preventDefault(); pick(e.target); selCount();}});
+  // RO Cooldown Overlay: a popup in the middle of the screen says where the link goes, then opens the project page in a new tab
+  // (a plain overlay instead of <dialog>: the top layer of a modal dialog would sit above the animated RO cursor)
+  var goWrap=document.createElement('div'); goWrap.className='go-wrap'; goWrap.hidden=true; document.body.appendChild(goWrap);
+  var goFrom=null;
+  var goClose=function(){goWrap.hidden=true; if(goFrom) goFrom.focus(); goFrom=null;};
+  var goTo=function(li){var u=UI[isPT?'pt-BR':'en']; goFrom=li;
+    goWrap.innerHTML='<div class="go-dlg" role="dialog" aria-modal="true" aria-labelledby="go-h"><p class="go-h" id="go-h">'+u.gotitle+'</p><p class="go-t">'+u.gotext+'</p><div class="go-a"><button type="button" class="npc-btn" data-go="no">'+u.gono+'</button><button type="button" class="npc-btn primary" data-go="ok">'+u.gook+'</button></div></div>';
+    goWrap.dataset.url=li.dataset.go; goWrap.hidden=false; goWrap.querySelector('[data-go="ok"]').focus();};
+  goWrap.addEventListener('click',function(e){var b=e.target.closest('[data-go]');
+    if(b&&b.dataset.go==='ok'){window.open(goWrap.dataset.url,'_blank','noopener'); goClose();}
+    else if((b&&b.dataset.go==='no')||e.target===goWrap) goClose();});
+  goWrap.addEventListener('keydown',function(e){
+    if(e.key==='Escape'){e.preventDefault(); goClose(); return;}
+    if(e.key==='Tab'){var bs=goWrap.querySelectorAll('button'), f=bs[0], l=bs[bs.length-1];
+      if(e.shiftKey&&document.activeElement===f){e.preventDefault(); l.focus();} else if(!e.shiftKey&&document.activeElement===l){e.preventDefault(); f.focus();}}});
+  secs.addEventListener('click',function(e){var g=e.target.closest('.item.go'); if(g){goTo(g); return;} var li=e.target.closest('[data-k]'); if(li){pick(li); selCount();}});
+  secs.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.matches('.item.go')){e.preventDefault(); goTo(e.target); return;}
+    if((e.key==='Enter'||e.key===' ')&&e.target.matches('.item[data-k]')){e.preventDefault(); pick(e.target); selCount();}});
 
   // install guide, bilingual
   var T={en:{h:'DISCLAIMER',prev:'Previous',next:'Next',close:'Close',reopen:'Show disclaimer',of:' of ',link:'GRFEditor (by Tokeiburu) on GitHub',change:'Change it to:',now:'Current:'},
