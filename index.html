@@ -348,6 +348,13 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     c.groups=[];
     D.sections.forEach(function(s){if(s.id==='cursors2') s.title='Cursor (RENEWAL)';});
   })();
+  // Big cards with light (PT: Cartas Grandes com Luz): subtopic under Big card sprites; Light N = Luz N (GIFs 75x416, real size)
+  (function(){
+    var i=D.sections.findIndex(function(s){return s.id==='bigcards';}); if(i<0) return;
+    D.sections.splice(i+1,0,{id:'bigcards-light',title:'Big cards with light',parent:D.sections[i].title,note:null,
+      groups:[{id:null,title:null,note:null,kind:'grid',figure:null,tile:[120,416],
+        items:[1,2,3].map(function(n){return {name:'Light '+n,href:REL+'Big_CardBeam'+n+'.grf',desc:null,badge:null,images:[{src:'assets/big_card_light'+n+'.gif',w:75,h:416,pixel:true}]};})}]});
+  })();
   // image slots: items without a preview get a placeholder that picks up assets/items/<slot> when the file exists
   var slotSeen={};
   // items without a photo yet: listed by their photo slot; remove a line here when the item gets its photo and real text back
@@ -392,7 +399,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Blank Miss Text':'Sem Texto de Miss','Square Menu':'Menu Quadrado','Big MVPs (lua)':'MVPs Grandes (lua)','Arrowed MVPs':'MVPs com Seta',
     'Small Slaves':'Lacaios Pequenos','Big MVPs with elements (no lua)':'MVPs Grandes com Elemento (sem lua)',
     'No Animation Monsters':'Monstros sem Animação','Small WoE-Stones':'Pedras de WoE Pequenas','Alternate Barricade':'Barricada Alternativa',
-    'Super Big Card':'Carta Super Grande',
+    'Super Big Card':'Carta Super Grande','Big cards with light':'Cartas Grandes com Luz','Light':'Luz',
     // grid names: base word, a trailing number is kept
     'Tarot Cards':'Cartas de Tarô','Big Card':'Carta Grande','Alternate Grid':'Grade Alternativa','Lockon':'Mira',
     'Black':'Preto','Blue':'Azul','Dark Purple':'Roxo Escuro','Full green':'Verde Cheio','Green':'Verde','Light Blue':'Azul Claro',
