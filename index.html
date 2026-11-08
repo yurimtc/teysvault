@@ -287,6 +287,14 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // White Cursor w/ Box Around Target: the cursor GIF and the target-box GIF side by side, real size, transparent
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name!=='White Cursor w/ Box Around Target') return; it.name='Cursor w/ Box 1';
     it.images=[{src:'assets/items/cursors2--white-cursor-w-box-around-target.gif',w:22,h:31,pixel:true},{src:'assets/items/cursors2--white-cursor-box-target.gif',w:56,h:100,pixel:true}];});});});
+  // Lunia Ver: new RENEWAL cursor, right after Yellow (animated 32x32 GIF; file LuniaCursor.grf)
+  D.sections.forEach(function(s){if(s.id!=='cursors2') return; s.groups.forEach(function(g){
+    var i=g.items.findIndex(function(it){return it.name==='Yellow';}); if(i<0) return;
+    g.items.splice(i+1,0,{name:'Lunia Ver',href:'#',desc:null,badge:null,images:[{src:'assets/CursorNew_Lunia_Ver.gif',w:32,h:32,pixel:true}]});});});
+  // Golden 1 (PT: Dourado 1): new RENEWAL cursor, right after Lunia Ver (animated 28x35 GIF; file GoldenCursor.grf)
+  D.sections.forEach(function(s){if(s.id!=='cursors2') return; s.groups.forEach(function(g){
+    var i=g.items.findIndex(function(it){return it.name==='Lunia Ver';}); if(i<0) return;
+    g.items.splice(i+1,0,{name:'Golden 1',href:'#',desc:null,badge:null,images:[{src:'assets/CursorNew_Dourado1.gif',w:28,h:35,pixel:true}]});});});
   // Cursor w/ Box 2-16: one item per RENEWAL cursor color (grid order), cursor GIF + box recolored from cursors0006.bmp (fontes/cursor-box)
   D.sections.forEach(function(s){if(s.id!=='cursors2') return; s.groups.forEach(function(g){
     var i=g.items.findIndex(function(it){return it.name==='Cursor w/ Box 1';}); if(i<0) return;
@@ -314,7 +322,24 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   [1,2,3,4,5,6].forEach(function(n){FILES['pneuma|Pneuma'+(n>1?' '+n:'')]='Pneuma'+n+'.grf';});
   [1,2,3,4,5,6,7,8,9].forEach(function(n){FILES['spiderweb|Spiderweb'+(n>1?' '+n:'')]='Spiderweb'+n+'.grf';});
   [1,2,3,4,5,6,7,8,9,10,11].forEach(function(n){FILES['tarotcard|Tarot Cards'+(n>1?' '+n:'')]='Tarot_Cards'+n+'.grf';});
+  // Cursors (OLD TIMES, section id 'cursors'): item name -> Cursor_<color>.grf; greens/whites matched to their GIFs by color; the Purple files are named Pink2/Pink3 on the release
+  var OLDC={'Black':'Black','Blue':'Blue','Blue 2':'Blue2','Dark Purple':'Dark_Purple','Full green':'Green1','Green':'Green2','Green 2':'Green3',
+    'Light Blue':'Light_Blue','Orange':'Orange','Pink':'Pink','Purple':'Pink2','Purple 2':'Pink3','Red':'Red','Red 2':'Red2',
+    'Teal':'Teal','Violet':'Violet','White':'White1','White 2':'White2','Yellow':'Yellow'};
+  Object.keys(OLDC).forEach(function(k){FILES['cursors|'+k]='Cursor_'+OLDC[k]+'.grf';});
+  // Cursors (RENEWAL, section id 'cursors2'): "Blue 2" -> CursorNew_Blue2.grf; Cursor w/ Box N -> CursorNew_<color>BOX.grf (Box 1 = White)
+  var NEWC=['Black','Blue','Blue2','Dark_Purple','Green','Light_Blue','Orange','Pink','Pink2','Purple','Red','Red2','Teal','Violet','White','Yellow'];
+  // the Purple files are named Pink3 on the release (CursorNew_Pink3.grf, CursorNew_Pink3BOX.grf)
+  var NEWF=function(c){return c==='Purple'?'Pink3':c;};
+  NEWC.forEach(function(c){FILES['cursors2|'+c.replace('_',' ').replace(/(\d)$/,' $1')]='CursorNew_'+NEWF(c)+'.grf';});
+  FILES['cursors2|Cursor w/ Box 1']='CursorNew_WhiteBOX.grf';
+  FILES['cursors2|Lunia Ver']='LuniaCursor.grf';
+  FILES['cursors2|Golden 1']='GoldenCursor.grf';
+  NEWC.filter(function(c){return c!=='White';}).forEach(function(c,k){FILES['cursors2|Cursor w/ Box '+(k+2)]='CursorNew_'+NEWF(c)+'BOX.grf';});
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){var f=FILES[s.id+'|'+it.name]; if(f) it.href=REL+f;});});});
+  // Purple cursors are shown as Pink, matching their file names (runs after the links, which are keyed by the old names)
+  var PINK={'cursors|Purple':'Pink 2','cursors|Purple 2':'Pink 3','cursors2|Purple':'Pink 3'};
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){var n=PINK[s.id+'|'+it.name]; if(n) it.name=n;});});});
   // Cursors: the parent holds no items; its two kinds sit underneath as subtopics
   (function(){
     var i=D.sections.findIndex(function(s){return s.id==='cursors';}); if(i<0) return;
@@ -371,7 +396,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     // grid names: base word, a trailing number is kept
     'Tarot Cards':'Cartas de Tarô','Big Card':'Carta Grande','Alternate Grid':'Grade Alternativa','Lockon':'Mira',
     'Black':'Preto','Blue':'Azul','Dark Purple':'Roxo Escuro','Full green':'Verde Cheio','Green':'Verde','Light Blue':'Azul Claro',
-    'Orange':'Laranja','Pink':'Rosa','Purple':'Roxo','Red':'Vermelho','Teal':'Azul-petróleo','Violet':'Violeta','White':'Branco','Yellow':'Amarelo',
+    'Orange':'Laranja','Pink':'Rosa','Purple':'Roxo','Red':'Vermelho','Teal':'Azul-petróleo','Violet':'Violeta','White':'Branco','Yellow':'Amarelo','Golden':'Dourado',
     // descriptions
     'Removes all bushes and trees':'Remove todos os arbustos e árvores',
     'Removes all water in-game':'Remove toda a água do jogo',
