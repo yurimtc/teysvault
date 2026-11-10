@@ -80,12 +80,20 @@ body{padding-bottom:90px}
 /* the side column (category list + "download selected" button) stays in view while the page scrolls;
    on short windows it may cover the corner art (it sits above it), and the list scrolls inside itself only when the window is too short for it */
 .side{position:sticky;top:90px;z-index:16;align-self:start;display:flex;flex-direction:column;gap:10px;min-width:0}
-nav.cats{max-height:calc(100vh - 110px - 54px);overflow:auto;scrollbar-width:none}
+nav.cats{max-height:calc(100vh - 110px - 54px - 40px);overflow:auto;scrollbar-width:none}
 /* the category list still scrolls (wheel/touch) on short windows, but without a visible scrollbar */
 nav.cats::-webkit-scrollbar{display:none}
 /* short windows: tighter rows so the whole category list shows without scrolling */
 @media (min-width:821px) and (max-height:1020px){nav.cats a,nav.cats ul ul a{padding-top:5px;padding-bottom:5px}nav.cats ul ul{margin-top:0;margin-bottom:2px}}
-/* download of the selected items (not wired yet): count shows how many cards are selected */
+/* download of the selected items: count shows how many cards are selected; the line under it says what happened */
+.dl-sel.busy{opacity:.7;cursor:progress}
+/* "cancel": small button under it that unpicks every selected card; only shown while something is selected */
+.dl-clr{align-self:center;min-height:30px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:rgba(9,15,26,.63);color:#cfd9e8;
+  font:inherit;font-size:12px;font-weight:600;cursor:pointer;backdrop-filter:blur(6px);transition:color .15s,border-color .15s,opacity .15s}
+.dl-clr:hover{color:#fff;border-color:var(--accent)}
+.dl-clr:focus-visible{outline:2px solid #fff3cf;outline-offset:2px}
+.dl-msg{margin:0;padding:8px 10px;border-radius:10px;background:rgba(9,15,26,.75);color:#cfd9e8;font-size:12px;line-height:1.4}
+.dl-msg:empty{display:none}
 .dl-sel{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--accent);
   background:var(--accent);color:var(--accent-ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);
   transition:filter .15s,transform .1s,opacity .15s}
@@ -203,6 +211,16 @@ nav.cats::-webkit-scrollbar{display:none}
 .ph.has[data-slot="cursors2--white-cursor-w-box-around-target.png"]{background:none;aspect-ratio:auto;width:auto;max-width:none;overflow:visible}
 .ph[data-slot="cursors2--white-cursor-w-box-around-target.png"] img{image-rendering:pixelated;width:22px;height:31px;object-fit:none}
 .ph[data-slot="effectedits--skill-icon-traps.png"] img{image-rendering:pixelated;position:absolute;inset:0;margin:auto;width:96px;height:96px}
+/* same 150x150 black box as the Trap 1-4 GIFs beside it */
+.ph.has[data-slot="effectedits--skill-icon-traps.png"]{width:150px;max-width:100%;aspect-ratio:1}
+/* Traps: the five cards in one row (narrow screens keep the automatic fit).
+   Traps and Buff Icons: cards of a row share one height and the pictures sit at the bottom, so they line up even when a name takes two lines */
+@media (min-width:821px){#traps .list{grid-template-columns:repeat(5,minmax(0,1fr))}}
+#traps .list,#bufficons .list{align-items:stretch}
+#traps .item,#bufficons .item{align-items:stretch}
+#traps .item-main,#bufficons .item-main{display:flex;flex-direction:column}
+#traps .item-name,#bufficons .item-name{margin-bottom:8px}
+#traps .item-imgs,#traps .ph,#bufficons .item-imgs{margin-top:auto}
 .ph:not(.has) img{position:absolute;opacity:0}
 .ph.has .ph-in{display:none}
 .ph-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px dashed var(--line);border-radius:6px;color:var(--muted);background:repeating-linear-gradient(135deg,transparent 0 10px,rgba(255,255,255,.018) 10px 20px)}
@@ -251,6 +269,8 @@ html[lang="pt-BR"] .ph-t::before{content:"Em breve"}
 .item.sel .item-imgs img,.item.sel .ph img,.tile.sel .img img{filter:sepia(.55) saturate(1.5) hue-rotate(-12deg) brightness(1.06) drop-shadow(0 0 6px rgba(242,193,78,.45))}
 @media (prefers-reduced-motion:reduce){.item.sel,.tile.sel .tile-in{animation:none}.item.sel::after,.tile.sel .tile-in::after{animation:none}}
 .grid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--tw),1fr));gap:10px}
+/* Pneuma and Lex Aeterna: always 3 tiles per row (6 items = 2 full rows); narrow screens keep the automatic fit */
+@media (min-width:821px){#pneuma .grid,#lexaeterna .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .tile-in{display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;height:100%;padding:12px 8px 10px;font:inherit;color:var(--muted);font-size:13px;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius)}
 .tile .img{display:grid;place-items:center;width:100%;height:var(--th)}
 .tile img{max-width:100%;max-height:var(--th);height:auto;width:auto;object-fit:contain}
@@ -305,6 +325,8 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   <aside class="side">
     <nav class="cats" aria-label="Categories"><ul id="nav"></ul></nav>
     <button type="button" class="dl-sel" id="dl-sel" data-n="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span class="t">Download selected</span><span class="c">0</span></button>
+    <button type="button" class="dl-clr" id="dl-clr" hidden>Cancel</button>
+    <p class="dl-msg" id="dl-msg" role="status"></p>
   </aside>
   <main id="main">
     <section class="guide" id="guide" aria-labelledby="g-h"></section>
@@ -314,6 +336,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   <footer>TEYSVault · <span id="foot">Repository by TEYS.</span></footer>
 </div>
 <script src="data.js"></script>
+<script src="grf-merge.js"></script>
 <script>
 (function(){
   var D=window.GRF, A='';
@@ -369,6 +392,37 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     var quag=[1,2,3,4,5,6,7].map(function(n){return {name:'Quagmire '+n,href:'#',desc:null,badge:null,images:[{src:'assets/quagmire'+n+'.gif',w:229,h:212,pixel:false}]};});
     var qg=mk('Quagmire',quag); qg.center=1;
     s.groups.splice(i,1,qg,mk('Hiding',by(/^(Hide Arrow \d+|No Hide Effect)$/)),mk('Falcons',by(/Falcon$/)));});
+  // Hiding: three cards, named after their files (Hide_Arrow1-3.grf). 1 = no effect at all (old "No Hide Effect"; black picture
+  // with "Sem Efeito / No Effect"), 2 and 3 = the two arrows
+  D.sections.forEach(function(s){s.groups.forEach(function(g){if(g.title!=='Hiding') return;
+    g.items=[{name:'Hide Arrow 1',href:'#',desc:null,badge:null,images:[{src:'assets/hide_arrow1.png',w:90,h:111,pixel:false}]},
+      {name:'Hide Arrow 2',href:'#',desc:null,badge:null,images:[{src:'assets/hide_arrow2.gif',w:40,h:115,pixel:false}]},
+      {name:'Hide Arrow 3',href:'#',desc:null,badge:null,images:[{src:'assets/hide_arrow.gif',w:45,h:111,pixel:false}]}];});});
+  // items taken off the site (section id + item name); a group left with no items goes away too
+  var GONE=['effectedits|Simplified Effects V6','effectedits|Small Sight/Ruwach','effectedits|No Casting Circles','effectedits|Rare MVP','effectedits|Owl Falcon','effectedits|Subtle Aura',
+    'songs|Silent Songs','songs|Shrunken Gem Song','miscedits|Invisible Sprite Marble','miscedits|No Animation Monsters'];
+  D.sections.forEach(function(s){
+    s.groups.forEach(function(g){g.items=g.items.filter(function(it){return GONE.indexOf(s.id+'|'+it.name)<0;});});
+    s.groups=s.groups.filter(function(g){return g.items.length;});});
+  // Strip Effects Pack 1-2 and Stone Curse 1-3: new models with animated GIFs (from GRF - SITE/Strip and GRF - SITE/Stone Curse);
+  // Strip GIFs at real size (152x95), Stone Curse GIFs (257x257) shown at 180x180
+  D.sections.forEach(function(s){if(s.id!=='effectedits') return; s.groups.forEach(function(g){
+    var i=g.items.findIndex(function(it){return it.name==='Strip Effects Pack';});
+    if(i>=0){g.items[i].images=[{src:'assets/strip1.gif',w:152,h:95,pixel:false}];
+      g.items.splice(i+1,0,{name:'Strip Effects Pack 2',href:'#',desc:null,badge:null,images:[{src:'assets/strip2.gif',w:152,h:95,pixel:false}]});}
+    // Trap 1-4: the two High Visibility Traps cards are renamed Trap 1 and Trap 2, and Trap 3 and Trap 4 are new
+    // (GIFs from GRF - SITE/Traps, shrunk from 250x250 to 150x150, 32 colors, looping; files Trap1-4.grf)
+    var t=g.items.findIndex(function(it){return it.name==='High Visibility Traps';});
+    if(t>=0){var tr2=g.items.findIndex(function(it){return it.name==='High Visibility Traps 2';}); if(tr2>=0) g.items.splice(tr2,1);
+      g.items.splice.apply(g.items,[t,1].concat([1,2,3,4].map(function(n){return {name:'Trap '+n,href:'#',desc:null,badge:null,images:[{src:'assets/trap'+n+'.gif',w:150,h:150,pixel:false}]};})));}
+    // Priest Effects Pack 1-3: one picture each (from GRF - SITE/Priest, magenta made transparent); pack 3 is new.
+    // All three PNGs share one 384x216 canvas (art scaled x3, x4 after cropping its empty border, x6; centered), shown at 192x108; files Priest_Pack1-3.grf
+    var p=g.items.findIndex(function(it){return it.name==='Priest Effects Pack 2';});
+    if(p>=0){g.items[p].images=[{src:'assets/priest2.png',w:192,h:108,pixel:false}];
+      g.items.splice(p+1,0,{name:'Priest Effects Pack 3',href:'#',desc:null,badge:null,images:[{src:'assets/priest3.png',w:192,h:108,pixel:false}]});}
+    g.items.forEach(function(it){if(it.name==='Priest Effects Pack') it.images=[{src:'assets/priest1.png',w:192,h:108,pixel:false}];});
+    g.items.forEach(function(it){
+      var m=/^Stone Curse ([123])$/.exec(it.name); if(m){it.desc=null; it.images=[{src:'assets/stone_curse'+m[1]+'.gif',w:180,h:180,pixel:false}];}});});});
   // Lockon 7-12: new lock-on markers (previews from GRF - SITE/Lock On, resized to 128x128 like the others)
   D.sections.forEach(function(s){s.groups.forEach(function(g){if(!g.items.some(function(it){return it.name==='Lockon';})) return;
     [7,8,9,10,11,12].forEach(function(n){g.items.push({name:'Lockon '+n,href:'#',desc:null,badge:null,images:[{src:'assets/lockon'+n+'.png',w:128,h:128,pixel:false}]});});});});
@@ -402,8 +456,8 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     var i=g.items.findIndex(function(it){return it.name==='Stat Boost Status Icons Pack';}); if(i<0) return;
     g.items.splice(i+1,0,{name:'Stat Boost Status Icons Pack 2',href:'#',desc:null,badge:null,
       images:['agi','dex','int','luk','str','vit'].map(function(k){return {src:'assets/'+k+'_gogi2.png',w:64,h:64,pixel:true};})});});});
-  // Skill Icon Traps: the old still image is replaced by the animated GIF in assets/items
-  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(s.id==='effectedits'&&it.name==='Skill Icon Traps') it.images=[];});});});
+  // Skill Icon Traps: the old still image is replaced by the animated GIF in assets/items; no text under the name
+  D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(s.id==='effectedits'&&it.name==='Skill Icon Traps'){it.images=[]; it.desc=null;}});});});
   // TEYSVault: every download points to google.com for now (real links will come later); RO Cooldown Overlay keeps its real link
   var DL='https://www.google.com/';
   D.sections.forEach(function(s){s.groups.forEach(function(g){g.items.forEach(function(it){if(it.name!=='RO Cooldown Overlay') it.href=DL;});});});
@@ -413,7 +467,17 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   var FILES={'mapedits|Extra Zoom':'Extra_Zoom.grf','mapedits|Mini-maps':'MapsRenewal.grf','mapedits|Scale Gray':'GrayScale.grf',
     'mapedits|Rachel Style':'RachelFloor.grf','mapedits|GrayOrange Scale':'GrayOrangeScale.grf','mapedits|Classic Gray':'Classic.Gray.grf',
     'mapedits|Sunlight':'Sunlight.grf','mapedits|Moonlight':'Moonlight.grf','mapedits|Niflheim':'Niflheim.grf',
-    'effectedits|Stat Boost Status Icons Pack 2':'BuffIcon2.grf'};
+    'effectedits|Stat Boost Status Icons Pack 2':'BuffIcon2.grf',
+    'mapedits|No Trees':'No_Trees.grf','mapedits|No Water':'No_Water.grf','miscedits|Alternate Barricade':'Alternate_Barricade.grf',
+    'bigcards|Super Big Card':'Super_big_card.grf'};
+  [1,2,3].forEach(function(n){FILES['effectedits|Hide Arrow '+n]='Hide_Arrow'+n+'.grf'; FILES['effectedits|Stone Curse '+n]='Stone_Curse'+n+'.grf';});
+  [1,2,3,4].forEach(function(n){FILES['effectedits|Trap '+n]='Trap'+n+'.grf';});
+  FILES['effectedits|Skill Icon Traps']='Skill_Icon_Traps.grf';
+  FILES['effectedits|Stat Boost Status Icons Pack']='BuffIcon1.grf';
+  FILES['effectedits|Simplified Soul Link']='Simplified_Soul_Link.grf';
+  [1,2,3].forEach(function(n){FILES['effectedits|Priest Effects Pack'+(n>1?' '+n:'')]='Priest_Pack'+n+'.grf';});
+  FILES['effectedits|Strip Effects Pack']='Strip_Pack1.grf'; FILES['effectedits|Strip Effects Pack 2']='Strip_Pack2.grf';
+  [1,2,3,4,5,6,7,8,9,10,11,12,13].forEach(function(n){FILES['bigcards|Big Card'+(n>1?' '+n:'')]='Big_Card'+(n>1?n:'')+'.grf';});
   [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].forEach(function(n){FILES['dispell|Dispell '+n]='Dispell'+n+'.grf';});
   [1,2,3,4,5,6].forEach(function(n){FILES['lexaeterna|Lex Aeterna '+n]='Lex_Aeterna'+n+'.grf';});
   [1,2,3,4,5,6].forEach(function(n){FILES['pneuma|Pneuma'+(n>1?' '+n:'')]='Pneuma'+n+'.grf';});
@@ -456,6 +520,20 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
       groups:[{id:null,title:null,note:null,kind:'grid',figure:null,tile:[120,416],
         items:[1,2,3].map(function(n){return {name:'Light '+n,href:REL+'Big_CardBeam'+n+'.grf',desc:null,badge:null,images:[{src:'assets/big_card_light'+n+'.gif',w:75,h:416,pixel:true}]};})}]});
   })();
+  // Traps and Buff Icons: subtopics under Miscellaneous, with the cards taken out of Effects (Trap 1-4 + Skill Icon Traps;
+  // Stat Boost Status Icons Pack 1-2). Runs after the links are set (those are keyed by the old section id);
+  // it.sid keeps the old section id for the photo slot name (assets/items/effectedits--...)
+  (function(){
+    var i=D.sections.findIndex(function(s){return s.id==='miscedits';}), e=D.sections.filter(function(s){return s.id==='effectedits';})[0]; if(i<0||!e) return;
+    var take=function(re){var out=[], base=null;
+      e.groups.forEach(function(g){g.items=g.items.filter(function(it){if(!re.test(it.name)) return true; it.sid='effectedits'; out.push(it); base=base||g; return false;});});
+      var n={}; for(var k in base) n[k]=base[k]; n.title=null; n.note=null; n.items=out; return n;};
+    var traps=take(/^(Trap \d+|Skill Icon Traps)$/), buff=take(/^Stat Boost Status Icons Pack( 2)?$/), par=D.sections[i].title;
+    e.groups=e.groups.filter(function(g){return g.items.length;});
+    var add=[]; if(traps.items.length) add.push({id:'traps',title:'Traps',parent:par,note:null,groups:[traps]});
+    if(buff.items.length) add.push({id:'bufficons',title:'Buff Icons',parent:par,note:null,groups:[buff]});
+    D.sections.splice.apply(D.sections,[i+1,0].concat(add));
+  })();
   // image slots: items without a preview get a placeholder that picks up assets/items/<slot> when the file exists
   var slotSeen={};
   // items without a photo yet: listed by their photo slot; remove a line here when the item gets its photo and real text back
@@ -466,7 +544,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'miscedits--invisible-sprite-marble','miscedits--big-tombstone',
     'miscedits--big-mvps-lua','miscedits--big-mvps-lua-2','miscedits--arrowed-mvps','miscedits--small-slaves',
     'miscedits--big-mvps-with-elements-no-lua','miscedits--no-animation-monsters','miscedits--small-woe-stones'].map(function(x){return x+'.png';});
-  var slot=function(s,it){var f=s.id+'--'+it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  var slot=function(s,it){var f=(it.sid||s.id)+'--'+it.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
     slotSeen[f]=(slotSeen[f]||0)+1; return f+(slotSeen[f]>1?'-'+slotSeen[f]:'')+'.png';};
   // ---- PT-BR translations (English text -> Portuguese). Edit here to change the Portuguese wording. ----
   var PT={
@@ -481,12 +559,12 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'No Trees':'Sem Árvores','No Water':'Sem Água','Extra Zoom':'Zoom Extra','Mini-maps':'Minimapas',
     'Simplified Effects V5':'Efeitos Simplificados V5','Simplified Effects V6':'Efeitos Simplificados V6',
     'Small Sight/Ruwach':'Sight/Ruwach Pequeno','No Casting Circles':'Sem Círculos de Conjuração',
-    'High Visibility Traps':'Armadilhas de Alta Visibilidade','High Visibility Traps 2':'Armadilhas de Alta Visibilidade 2',
+    'Trap':'Armadilha','Traps':'Armadilhas','Buff Icons':'Ícones de Buff','High Visibility Traps':'Armadilhas de Alta Visibilidade','High Visibility Traps 2':'Armadilhas de Alta Visibilidade 2',
     'Rare MVP':'MVP Raro','Skill Icon Traps':'Armadilhas com Ícone de Skill','Subtle Aura':'Aura Sutil',
     'Strip Effects Pack':'Pacote de Efeitos de Strip','Stat Boost Status Icons Pack':'Pacote de Ícones de Buff de Atributos','Stat Boost Status Icons Pack 2':'Pacote de Ícones de Buff de Atributos 2','TBA - Soon':'Em breve',
     'Priest Effects Pack':'Pacote de Efeitos de Sacerdote','Priest Effects Pack 2':'Pacote de Efeitos de Sacerdote 2',
     'Simplified Soul Link':'Soul Link Simplificado','Block Quagmire':'Quagmire em Blocos','Labeled Quagmire':'Quagmire com Nome',
-    'Hide Arrow 1':'Seta de Hiding 1','Hide Arrow 2':'Seta de Hiding 2','No Hide Effect':'Sem Efeito de Hiding','Owl Falcon':'Falcão Coruja',
+    'Hide Arrow 1':'Seta de Hiding 1','Hide Arrow 2':'Seta de Hiding 2','Hide Arrow 3':'Seta de Hiding 3','No Hide Effect':'Sem Efeito de Hiding','Owl Falcon':'Falcão Coruja',
     'Short Songs Sound Effects':'Sons de Música Curtos','Silent Songs':'Músicas Silenciosas','Shrunken Gem Song':'Música com Gemas Menores',
     'Block Songs':'Músicas em Blocos','Alternative Fortune Kiss':'Fortune Kiss Alternativo','Alternative Fortune Kiss 2':'Fortune Kiss Alternativo 2',
     'Text Status Effects':'Efeitos de Status em Texto','Text Status Effects 2':'Efeitos de Status em Texto 2',
@@ -545,8 +623,8 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     'Shrinks flags, stones, emps, etc. Prevents players hiding under them. Includes alternate barricade below.':'Diminui bandeiras, pedras, emperium etc. Impede que jogadores se escondam embaixo deles. Inclui a barricada alternativa abaixo.'
   };
   for(var cb=1;cb<=16;cb++) PT['Cursor w/ Box '+cb]='Cursor com Caixa '+cb;
-  var UI={en:{gotitle:'Project page',gotext:'You will be taken to the project page of RO Cooldown Overlay on GitHub.',gook:'Go to GitHub',gono:'Cancel',dl:'Download',dlsel:'Download selected',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
-    'pt-BR':{gotitle:'Página do projeto',gotext:'Você será levado para a página do projeto RO Cooldown Overlay no GitHub.',gook:'Ir para o GitHub',gono:'Cancelar',dl:'Baixar',dlsel:'Baixar selecionados',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
+  var UI={en:{gotitle:'Project page',gotext:'You will be taken to the project page of RO Cooldown Overlay on GitHub.',gook:'Go to GitHub',gono:'Cancel',dl:'Download',dlsel:'Download selected',dlclr:'Cancel',dlwait:'Merging the files…',dlbig:'The map file is large, so it was downloaded on its own.',dlnone:'Some selected items have no file yet.',dlerr:'Could not build the file. Try again.',soon:'Link coming soon',skip:'Skip to downloads',cats:'Categories',search:'Search edits',foot:'Repository by TEYS.',empty:'Nothing by that name. Try a shorter word, like “cursor” or “map”.'},
+    'pt-BR':{gotitle:'Página do projeto',gotext:'Você será levado para a página do projeto RO Cooldown Overlay no GitHub.',gook:'Ir para o GitHub',gono:'Cancelar',dl:'Baixar',dlsel:'Baixar selecionados',dlclr:'Cancelar',dlwait:'Juntando os arquivos…',dlbig:'O arquivo de mapa é grande, por isso foi baixado separado.',dlnone:'Alguns itens selecionados ainda não têm arquivo.',dlerr:'Não deu para gerar o arquivo. Tente de novo.',soon:'Link em breve',skip:'Pular para os downloads',cats:'Categorias',search:'Buscar edições',foot:'Repositório por TEYS.',empty:'Nada com esse nome. Tente uma palavra mais curta, como “cursor” ou “mapa”.'}};
   // English names shown for some categories (the left side stays as in data.js)
   var EN={'Map edits':'Map Edits','Effect edits':'Effects','Song edits':'Songs','Status effects':'Negative Status','Tarot cards':'Tarot Cards'};
   var isPT=false;
@@ -557,6 +635,8 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   var lnk=function(it){return it.href==='#'?' onclick="return false" title="'+UI[isPT?'pt-BR':'en'].soon+'"':' target="_blank" rel="noopener"';};
   // selected cards (section id + item name); kept while the page is open, also across language changes
   var SEL={};
+  // download link of each card, by card key (filled when the sections are drawn)
+  var HREF={};
   // selection rules: items with the same group id are "only one" (picking one unpicks the other); null = can be picked with anything;
   // 'off' = cannot be picked. Groups may span sections (all cursors; big cards + fake light; gray maps + CATO style).
   var ONE={tarotcard:1,pneuma:1,spiderweb:1,lexaeterna:1,dispell:1};
@@ -566,10 +646,13 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     if(sid==='bigcards'||sid==='bigcards-light') return 'bigcard';
     if(/^cursors/.test(sid)) return 'cursor';
     if(sid==='mapedits') return /^(Scale Gray|Rachel Style|GrayOrange Scale|Classic Gray|Sunlight|Moonlight|Niflheim)$/.test(n)?'mapstyle':null;
+    if(sid==='traps') return /^Trap \d+$/.test(n)?'traps':null;
+    if(sid==='bufficons') return 'statboost';
     if(sid==='effectedits'){
-      if(/^High Visibility Traps( 2)?$/.test(n)) return 'traps';
+      if(/^Trap \d+$/.test(n)) return 'traps';
       if(/^Stat Boost Status Icons Pack( 2)?$/.test(n)) return 'statboost';
-      if(/^Priest Effects Pack( 2)?$/.test(n)) return 'priest';
+      if(/^Strip Effects Pack( 2)?$/.test(n)) return 'strip';
+      if(/^Priest Effects Pack( \d+)?$/.test(n)) return 'priest';
       if(/^Stone Curse \d+$/.test(n)) return 'stone';
       if(/^Quagmire \d+$/.test(n)) return 'quag';
       if(/^(Hide Arrow \d+|No Hide Effect)$/.test(n)) return 'hide';
@@ -619,13 +702,13 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
       if(g.kind==='grid'){
         html+='<ul class="grid" style="--tw:'+Math.max(120,g.tile[0])+'px;--th:'+g.tile[1]+'px">';
         g.items.forEach(function(it){var im=it.images[0]||{};
-          var k=key(s,it), x=rule(s.id,it.name);
+          var k=key(s,it), x=rule(s.id,it.name); HREF[k]=it.href;
           html+='<li class="tile'+(SEL[k]?' sel':'')+'"'+selAt(k,x)+' data-q="'+esc(qtext([it.name,s.title,s.parent]))+'"><button type="button" class="tile-in" aria-pressed="'+!!SEL[k]+'"><span class="img"><img src="'+A+esc(im.src)+'" width="'+im.w+'" height="'+im.h+'" alt="" loading="lazy" decoding="async"'+(im.pixel?' class="pix"':'')+'></span>'+esc(tr(it.name))+'</button></li>';});
         html+='</ul>';
       } else {
         html+='<ul class="list'+(g.one?' one':'')+(g.center?' center':'')+'">';
         g.items.forEach(function(it){
-          var f=it.images.length?null:slot(s,it), k=key(s,it), x=rule(s.id,it.name);
+          var f=it.images.length?null:slot(s,it), k=key(s,it), x=rule(s.id,it.name); HREF[k]=it.href;
           // items still waiting for a photo show "TBA - Soon" / "Em breve" as title and description (the photo slot keeps the real name)
           if(f&&TBA.indexOf(f)>=0) it={name:'TBA - Soon',desc:'TBA - Soon',badge:null,href:it.href,images:it.images,tba:1};
           html+='<li class="item'+(x==='link'?' go" data-go="'+esc(it.href)+'" role="button" tabindex="0"':x==='off'?' nosel"':(SEL[k]?' sel':'')+'"'+selAt(k,x)+' role="button" tabindex="0" aria-pressed="'+!!SEL[k]+'"')+' data-q="'+esc(qtext([it.name,it.desc,s.title,g.title]))+'"><div class="item-main"><span class="item-name">'+esc(tr(it.name))+'</span>'+(it.badge?'<span class="badge">'+esc(tr(it.badge))+'</span>':'')+(it.desc?'<p class="item-desc">'+esc(tr(it.desc))+'</p>':'');
@@ -653,8 +736,35 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   // silver look for the other cards of a family that already has a pick
   var dim=function(){var on={}; secs.querySelectorAll('.sel[data-x]').forEach(function(o){on[o.dataset.x]=1;});
     secs.querySelectorAll('[data-x]').forEach(function(o){o.classList.toggle('dim',!!on[o.dataset.x]&&!o.classList.contains('sel'));});};
-  // "download selected" button: only shows the count for now (download not wired yet)
-  var selCount=function(){var b=document.getElementById('dl-sel'), n=Object.keys(SEL).length; b.dataset.n=n; b.querySelector('.c').textContent=n;};
+  // "download selected" button: shows the count; a click joins the selected GRFs into one teysvault.grf (see grf-merge.js)
+  var selCount=function(){var b=document.getElementById('dl-sel'), n=Object.keys(SEL).length; b.dataset.n=n; b.querySelector('.c').textContent=n;
+    document.getElementById('dl-clr').hidden=!n;
+    // the notice under the button is about the last download: it goes away as soon as the selection changes
+    if(!dlBusy) document.getElementById('dl-msg').textContent='';};
+  // "cancel" button: unpicks every selected card
+  document.getElementById('dl-clr').addEventListener('click',function(){
+    secs.querySelectorAll('.sel[data-k]').forEach(function(o){mark(o,false);});
+    dim(); selCount(); document.getElementById('dl-msg').textContent='';});
+  // the files to join are read from the grf/ folder of the site (the GitHub release cannot be read by scripts: no CORS header).
+  // The big map files are not in grf/: they download on their own, straight from the release.
+  var BIG=/^(GrayScale|RachelFloor|GrayOrangeScale|Classic\.Gray|Sunlight|Moonlight|Niflheim)\.grf$/;
+  var dlBusy=false;
+  var save=function(url,name){var a=document.createElement('a'); a.href=url; if(name) a.download=name; document.body.appendChild(a); a.click(); a.remove();};
+  document.getElementById('dl-sel').addEventListener('click',function(){
+    var b=this, u=UI[isPT?'pt-BR':'en'], msg=document.getElementById('dl-msg'), small=[], big=[], none=0;
+    if(dlBusy) return;
+    Object.keys(SEL).forEach(function(k){var h=HREF[k]||''; if(h.indexOf(REL)!==0){none++; return;} var f=h.slice(REL.length); (BIG.test(f)?big:small).push(f);});
+    if(!small.length&&!big.length){msg.textContent=none?u.dlnone:''; return;}
+    dlBusy=true; b.classList.add('busy'); msg.textContent=u.dlwait;
+    Promise.all(small.map(function(f){return fetch(A+'grf/'+f).then(function(r){if(!r.ok) throw new Error(f); return r.arrayBuffer();});}))
+      .then(function(bufs){return bufs.length?GRFMerge.merge(bufs):null;})
+      .then(function(blob){
+        if(blob){var url=URL.createObjectURL(blob); save(url,'teysvault.grf'); setTimeout(function(){URL.revokeObjectURL(url);},60000);}
+        big.forEach(function(f){save(REL+f);});
+        msg.textContent=[big.length?u.dlbig:'',none?u.dlnone:''].filter(Boolean).join(' ');})
+      .catch(function(){msg.textContent=u.dlerr;})
+      .then(function(){dlBusy=false; b.classList.remove('busy');});
+  });
   // RO Cooldown Overlay: a popup in the middle of the screen says where the link goes, then opens the project page in a new tab
   // (a plain overlay instead of <dialog>: the top layer of a modal dialog would sit above the animated RO cursor)
   var goWrap=document.createElement('div'); goWrap.className='go-wrap'; goWrap.hidden=true; document.body.appendChild(goWrap);
@@ -699,7 +809,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     else if(a==='reopen'){closed=false;page=0;draw('next');}
   });
   function guide(l){lang=l; isPT=l==='pt-BR'; draw(); build(); dim(); afterBuild();
-    var u=UI[l]; document.querySelector('.skip').textContent=u.skip; document.querySelector('nav.cats').setAttribute('aria-label',u.cats); document.querySelector('#dl-sel .t').textContent=u.dlsel;
+    var u=UI[l]; document.querySelector('.skip').textContent=u.skip; document.querySelector('nav.cats').setAttribute('aria-label',u.cats); document.querySelector('#dl-sel .t').textContent=u.dlsel; document.getElementById('dl-clr').textContent=u.dlclr;
     document.querySelector('.search .sr').textContent=u.search; document.getElementById('empty').textContent=u.empty; document.getElementById('foot').textContent=u.foot;
     document.documentElement.lang=l==='pt-BR'?'pt-BR':'en';
     document.querySelectorAll('.lang button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.lang===l);});
