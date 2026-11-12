@@ -80,7 +80,7 @@ body{padding-bottom:90px}
 /* the side column (category list + "download selected" button) stays in view while the page scrolls;
    on short windows it may cover the corner art (it sits above it), and the list scrolls inside itself only when the window is too short for it */
 .side{position:sticky;top:90px;z-index:16;align-self:start;display:flex;flex-direction:column;gap:10px;min-width:0}
-nav.cats{max-height:calc(100vh - 110px - 54px - 40px);overflow:auto;scrollbar-width:none}
+nav.cats{max-height:calc(100vh - 110px - 54px - 40px - 96px);overflow:auto;scrollbar-width:none}
 /* the category list still scrolls (wheel/touch) on short windows, but without a visible scrollbar */
 nav.cats::-webkit-scrollbar{display:none}
 /* short windows: tighter rows so the whole category list shows without scrolling */
@@ -104,6 +104,17 @@ nav.cats::-webkit-scrollbar{display:none}
 .dl-sel .c{min-width:22px;padding:1px 7px;border-radius:999px;background:var(--accent-ink);color:var(--accent);font-size:12px;font-variant-numeric:tabular-nums}
 .dl-sel[data-n="0"]{background:rgba(9,15,26,.63);color:#93a4bd;border-color:var(--line-2);backdrop-filter:blur(6px)}
 .dl-sel[data-n="0"] .c{background:var(--panel-2);color:#93a4bd}
+/* "Servidores" block above the category list: pick the server (LatamRO or other servers); the choice is kept for the next visit */
+.srv{background:rgba(9,15,26,.63);border:1px solid var(--line-2);border-radius:12px;padding:10px 12px 12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.04);backdrop-filter:blur(6px)}
+.srv-h{margin:0 0 8px;font-size:14px;font-weight:700;color:#e6edf7}
+.srv-b{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
+.srv-b button{height:38px;padding:0 8px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);background:transparent;border:0;cursor:pointer}
+.srv-b button+button{border-left:1px solid var(--line-2)}
+.srv-b button:hover{color:var(--ink)}
+.srv-b button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.srv-b button:focus-visible{outline:2px solid #fff3cf;outline-offset:-3px;border-radius:999px}
+@media (max-width:820px){.srv{display:flex;align-items:center;gap:12px;padding:8px 10px}.srv-h{margin:0;flex:none}.srv-b{flex:1}}
 .cats ul{list-style:none;margin:0;padding:0}
 /* the side list sits on its own dark panel so it reads over any background */
 @media (min-width:821px){nav.cats{background:rgba(9,15,26,.63);border:1px solid var(--line-2);border-radius:12px;padding:10px 8px;
@@ -255,6 +266,15 @@ html[lang="pt-BR"] .ph-t::before{content:"Em breve"}
   animation:sel-spin 2.4s linear infinite;filter:drop-shadow(0 0 4px rgba(242,193,78,.6))}
 /* "only one" family with a pick: the other cards of that family turn silver with a light gray tint on the picture
    (they can still be clicked: that moves the pick to them) */
+/* locked: the content fades (not the card itself, so the tag below stays readable) */
+.item.off>*,.tile.off .tile-in{opacity:.4;filter:grayscale(1)}
+.item.off,.tile.off .tile-in{cursor:not-allowed}
+.item.off:hover,.tile.off .tile-in:hover{border-color:var(--line)}
+/* small "not available on LatamRO" tag on locked cards */
+.item.off::before{content:attr(data-off);position:absolute;z-index:2;top:8px;right:8px;padding:2px 8px;border-radius:999px;
+  background:#0b1320;border:1px solid var(--line-2);color:#cfd9e8;font-size:11px;font-weight:600;line-height:1.5;pointer-events:none}
+/* small cards (cursors) have no room for the tag: a single note under the section title says it instead */
+.off-note{margin:-4px 0 12px;padding:8px 12px;border:1px solid var(--line-2);border-radius:10px;background:rgba(9,15,26,.75);color:#cfd9e8;font-size:13px}
 .item.dim,.tile.dim .tile-in{background:linear-gradient(160deg,#5c6471 0%,#3e444e 55%,#2e333b 100%);border-color:#7d8794}
 .item.dim .item-desc{color:#d3d9e2}
 .tile.dim .tile-in{color:#dfe4ec}
@@ -300,6 +320,74 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   .search svg{left:11px}
   .lang button{min-width:40px;padding:0 8px}
 }
+/* TUTORIAL button (next to EN/PT) and the tutorial slides: same NPC box look as the AVISO box.
+   A plain overlay like .go-wrap, so the animated RO cursor stays on top. */
+/* gold light running around the border, one turn every 3s (the angle --tut-a turns; the inside is the header color.
+   Not var(--bg): the background script turns --bg into an image) */
+@property --tut-a{syntax:'<angle>';inherits:false;initial-value:0deg}
+.tut-btn{flex:none;height:42px;padding:0 16px;font:inherit;font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--accent);
+  border:2px solid transparent;border-radius:999px;cursor:pointer;
+  background:linear-gradient(#0e1724,#0e1724) padding-box,
+    conic-gradient(from var(--tut-a),rgba(242,193,78,.15),#f2c14e 20%,#fff1c2 25%,#f2c14e 30%,rgba(242,193,78,.15) 55%) border-box;
+  animation:tut-turn 3s linear infinite}
+.tut-btn:hover{background:linear-gradient(var(--panel),var(--panel)) padding-box,
+    conic-gradient(from var(--tut-a),rgba(242,193,78,.15),#f2c14e 20%,#fff1c2 25%,#f2c14e 30%,rgba(242,193,78,.15) 55%) border-box}
+@keyframes tut-turn{to{--tut-a:360deg}}
+/* less motion: the light stops and the whole border stays gold */
+@media (prefers-reduced-motion:reduce){.tut-btn,.tut-btn:hover{animation:none;border-color:var(--accent)}.tut-btn{background:transparent}.tut-btn:hover{background:var(--panel)}}
+.tut-wrap{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:16px;background:rgba(5,9,16,.72);backdrop-filter:blur(2px)}
+.tut-wrap[hidden]{display:none}
+.tut-dlg{width:min(980px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:20px 24px 16px;background:var(--panel);border:1px solid var(--line-2);
+  border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.6);animation:go-in .18s ease-out}
+.tut-top{display:flex;align-items:center;gap:8px;margin:0 0 14px}
+.tut-top .npc-name{margin:0}
+.tut-x{margin-left:auto;width:40px;height:40px;display:grid;place-items:center;padding:0;font:inherit;font-size:22px;line-height:1;color:var(--muted);
+  background:transparent;border:1px solid transparent;border-radius:8px;cursor:pointer}
+.tut-x:hover{color:var(--ink);border-color:var(--line-2)}
+.tut-s{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:center}
+.tut-s[hidden]{display:none}
+.tut-s>*{min-width:0}
+.tut-s.in{animation:tut-in .28s cubic-bezier(.2,.8,.2,1)}
+.tut-s.in.back{animation-name:tut-back}
+@keyframes tut-in{from{opacity:0;transform:translateX(24px)}}
+@keyframes tut-back{from{opacity:0;transform:translateX(-24px)}}
+.tut-pic{aspect-ratio:16/10;display:grid;place-items:center;overflow:hidden;background:#060b14;border:1px solid var(--line-2);border-radius:10px}
+.tut-pic img{width:100%;height:100%;object-fit:contain;display:block}
+.tut-pic img.fit{width:80%;height:auto}
+.tut-k{margin:0;color:var(--muted);font-size:13px;font-weight:600}
+.tut-s h2{margin:4px 0 10px;font-size:26px;line-height:1.2}
+.tut-s p{margin:8px 0}
+.tut-s ul{margin:8px 0;padding-left:20px}
+.tut-s li{margin:4px 0}
+.tut-s code{font:13px/1.4 Consolas,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
+.tut-s kbd{font:600 12px/1 inherit;background:var(--panel-2);border:1px solid var(--line-2);border-bottom-width:2px;border-radius:5px;padding:3px 6px}
+.tut-s .hl{color:var(--accent);font-weight:600}
+.tut-s.end{display:block;text-align:center;padding:36px 10px}
+.tut-s.end[hidden]{display:none}
+.tut-s.end p{color:var(--muted);margin:0 0 18px}
+.tut-act{display:flex;align-items:center;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.tut-dots{display:flex;align-items:center;gap:6px;margin-right:auto}
+.tut-dots button{width:10px;height:10px;padding:0;border:0;border-radius:50%;background:var(--line-2);cursor:pointer}
+.tut-dots button[aria-current=step]{width:24px;border-radius:5px;background:var(--accent)}
+.tut-dots span{margin-left:8px;color:var(--muted);font-size:13px}
+@media (prefers-reduced-motion:reduce){.tut-dlg,.tut-s.in{animation:none}}
+@media (max-width:760px){
+  .tut-dlg{padding:16px}
+  .tut-s{grid-template-columns:1fr;gap:14px}
+  .tut-s h2{font-size:22px}
+  .tut-act{flex-wrap:wrap}
+  .tut-dots{flex-basis:100%;margin-bottom:4px}
+  .tut-dots button{width:8px;height:8px}
+  .tut-dots button[aria-current=step]{width:18px}
+  .tut-act .npc-btn{flex:1}
+}
+@media (max-width:560px){
+  /* header: the search goes to its own row so brand, EN/PT and TUTORIAL fit on the first one */
+  .top-in{flex-wrap:wrap}
+  .search{order:3;flex-basis:100%}
+  .lang{margin-left:auto}
+  .tut-btn{height:40px;padding:0 12px}
+}
 </style>
 <script>
 // background: a different one of the 20 scenes on every reload (never the same twice in a row)
@@ -320,9 +408,17 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     <button type="button" data-lang="en" aria-pressed="true">EN</button>
     <button type="button" data-lang="pt-BR" aria-pressed="false">PT</button>
   </div>
+  <button type="button" class="tut-btn" id="tut-btn" aria-haspopup="dialog">TUTORIAL</button>
 </div></header>
 <div class="wrap">
   <aside class="side">
+    <div class="srv" role="group" aria-labelledby="srv-h">
+      <p class="srv-h" id="srv-h">Servers</p>
+      <div class="srv-b">
+        <button type="button" data-srv="latamro" aria-pressed="true">LatamRO</button>
+        <button type="button" data-srv="outros" aria-pressed="false">Others</button>
+      </div>
+    </div>
     <nav class="cats" aria-label="Categories"><ul id="nav"></ul></nav>
     <button type="button" class="dl-sel" id="dl-sel" data-n="0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span class="t">Download selected</span><span class="c">0</span></button>
     <button type="button" class="dl-clr" id="dl-clr" hidden>Cancel</button>
@@ -730,7 +826,21 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
   var mark=function(li,on){var k=li.dataset.k; if(on) SEL[k]=1; else delete SEL[k];
     li.classList.toggle('sel',on); (li.matches('[aria-pressed]')?li:li.querySelector('[aria-pressed]')).setAttribute('aria-pressed',on);};
   // picking an "only one" item unpicks the others of its group (also in other sections)
-  var pick=function(li){var on=!SEL[li.dataset.k], x=li.dataset.x;
+  // edits that do not work on the LatamRO server: locked (cannot be picked) while "LatamRO" is chosen in Servidores
+  var LATAM_OFF=function(k){var p=k.split('|'), sid=p[0], n=p[1].replace(/#\d+$/,'');
+    return sid==='cursors-old'||(sid==='mapedits'&&/^(Extra Zoom|Scale Gray|Rachel Style|GrayOrange Scale|Classic Gray|Sunlight|Moonlight|Niflheim)$/.test(n))||
+      (sid==='statuseffect'&&/^(Silence( 2)?|Confusion)$/.test(n));};
+  var lock=function(){var on=document.documentElement.dataset.server!=='outros', t=isPT?'Indisponível no LatamRO':'Not available on LatamRO';
+    secs.querySelectorAll('[data-k]').forEach(function(li){var off=on&&LATAM_OFF(li.dataset.k), b=li.matches('[aria-pressed]')?li:li.querySelector('[aria-pressed]');
+      if(off&&SEL[li.dataset.k]) mark(li,false);
+      li.classList.toggle('off',off); b.toggleAttribute('aria-disabled',off); if(off) b.setAttribute('aria-disabled','true');
+      if(off){li.title=t; li.dataset.off=t;} else {li.removeAttribute('title'); delete li.dataset.off;}});
+    secs.querySelectorAll('[data-sec]').forEach(function(sec){var n=sec.querySelector(':scope>.off-note'), ks=sec.querySelectorAll('.tile[data-k]'),
+        all=ks.length&&[].every.call(ks,function(li){return li.classList.contains('off');});
+      if(all&&!n){n=document.createElement('p'); n.className='off-note'; sec.querySelector('.sec-h').after(n);}
+      if(n){if(all) n.textContent=t+'.'; else n.remove();}});};
+  document.addEventListener('grf-server',function(){lock(); dim(); selCount();});
+  var pick=function(li){if(li.classList.contains('off')) return; var on=!SEL[li.dataset.k], x=li.dataset.x;
     if(on&&x) secs.querySelectorAll('.sel[data-x="'+x+'"]').forEach(function(o){if(o!==li) mark(o,false);});
     mark(li,on); dim();};
   // silver look for the other cards of a family that already has a pick
@@ -808,7 +918,7 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     else if(a==='close'){closed=true;draw('reopen');}
     else if(a==='reopen'){closed=false;page=0;draw('next');}
   });
-  function guide(l){lang=l; isPT=l==='pt-BR'; draw(); build(); dim(); afterBuild();
+  function guide(l){lang=l; isPT=l==='pt-BR'; draw(); build(); lock(); dim(); afterBuild();
     var u=UI[l]; document.querySelector('.skip').textContent=u.skip; document.querySelector('nav.cats').setAttribute('aria-label',u.cats); document.querySelector('#dl-sel .t').textContent=u.dlsel; document.getElementById('dl-clr').textContent=u.dlclr;
     document.querySelector('.search .sr').textContent=u.search; document.getElementById('empty').textContent=u.empty; document.getElementById('foot').textContent=u.foot;
     document.documentElement.lang=l==='pt-BR'?'pt-BR':'en';
@@ -896,6 +1006,86 @@ footer{grid-column:2;color:var(--muted);font-size:13px}
     q.placeholder=pt?'Buscar':'Search';}
   document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',ph);});
   if(mq.addEventListener) mq.addEventListener('change',ph); ph();
+})();
+// "Servidores": LatamRO or other servers. The choice is saved and also kept on <html data-server="..."> for anything that depends on it.
+(function(){
+  var bs=document.querySelectorAll('[data-srv]'), h=document.getElementById('srv-h');
+  function set(v){bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.srv===v);}); document.documentElement.dataset.server=v;
+    try{localStorage.setItem('grf-server',v);}catch(e){}
+    document.dispatchEvent(new Event('grf-server'));}
+  function txt(){var pt=document.documentElement.lang==='pt-BR'; h.textContent=pt?'Servidores':'Servers';
+    document.querySelector('[data-srv="outros"]').textContent=pt?'Outros':'Others';}
+  var v='latamro'; try{v=localStorage.getItem('grf-server')||v;}catch(e){}
+  set(v==='outros'?'outros':'latamro'); txt();
+  bs.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.srv);});});
+  document.querySelectorAll('.lang button').forEach(function(b){b.addEventListener('click',txt);});
+})();
+// TUTORIAL button: opens the how-to slides (one step per slide, "Modelo 2" of tutorial/), in the chosen language.
+// Pictures are screenshots of this site, taken with Playwright: tutorial/img (PT) and tutorial/img/en (EN).
+(function(){
+  var btn=document.getElementById('tut-btn'), wrap=document.createElement('div');
+  wrap.className='tut-wrap'; wrap.hidden=true; document.body.appendChild(wrap);
+  var T={
+    'pt-BR':{close:'Fechar',prev:'Anterior',next:'Próximo',of:' de ',slide:'Slide ',done:'Começar',S:[
+      {img:'01-visao-geral',k:'Bem-vindo',h:'O que é o TEYSVault',t:'<p>Um acervo de edições de <code>.grf</code> para Ragnarok: mapas, efeitos, cursores, cartas e mais.</p><p>Você escolhe as edições, baixa tudo em um arquivo só e instala no jogo.</p>',alt:'Página inicial do TEYSVault'},
+      {img:'02b-idioma',fit:1,k:'Passo 1',h:'Escolha o idioma',t:'<p>Clique em <span class="hl">EN</span> ou <span class="hl">PT</span>, no canto superior direito.</p><p>O site lembra sua escolha.</p>',alt:'Botões EN e PT no topo do site'},
+      {img:'02c-servidor',k:'Passo 2',h:'Escolha o servidor',t:'<p>Em <span class="hl">Servidores</span>, na barra da esquerda, escolha <b>LatamRO</b> ou <b>Outros</b>. O site lembra sua escolha.</p><p>No LatamRO, algumas edições não funcionam. Elas ficam apagadas, com o aviso <span class="hl">Indisponível no LatamRO</span>, e não dá para selecionar.</p>',alt:'Bloco Servidores com LatamRO escolhido e edições indisponíveis apagadas'},
+      {img:'04-aviso-2',k:'Passo 3',h:'Leia o aviso',t:'<p>A caixa <span class="hl">AVISO</span> tem 3 páginas com as instruções de instalação.</p><p><span class="hl">Fechar</span> esconde. <span class="hl">Mostrar aviso</span> traz de volta.</p>',alt:'Caixa de aviso, página 2'},
+      {img:'06-categorias',k:'Passo 4',h:'Navegue pelas categorias',t:'<p>Clique em uma categoria na barra da esquerda para pular até ela.</p><p>O número mostra quantas edições existem ali.</p>',alt:'Barra de categorias'},
+      {img:'07-busca',k:'Passo 5',h:'Busque',t:'<p>Digite no campo <span class="hl">Buscar</span>. Funciona em português e inglês.</p><ul><li><kbd>/</kbd> vai para a busca.</li><li><kbd>Esc</kbd> limpa.</li></ul>',alt:'Busca por quagmire'},
+      {img:'08-selecionar',k:'Passo 6',h:'Selecione',t:'<p>Clique nos cards que quiser. Selecionado = <span class="hl">borda dourada</span>.</p><p>Clique de novo para desmarcar.</p>',alt:'Dois cards selecionados com borda dourada'},
+      {img:'09-so-um',k:'Passo 7',h:'Só um por grupo',t:'<p>Cursores, Quagmire, estilos de mapa e Tarô: só dá para usar um de cada.</p><p>Ao escolher outro, o anterior é desmarcado. Os demais ficam <span class="hl">prateados</span>.</p>',alt:'Quagmire 2 selecionado, os outros prateados'},
+      {img:'10-baixar',fit:1,k:'Passo 8',h:'Baixe',t:'<p>Clique em <span class="hl">Baixar selecionados</span>. Sai um arquivo só: <code>teysvault.grf</code>.</p><p>Mapas grandes (Scale Gray, Sunlight, Niflheim…) baixam separados.</p>',alt:'Botão Baixar selecionados'},
+      {img:'05-aviso-3',k:'Passo 9',h:'Instale',t:'<p><b>GRF Editor:</b> EDIT → MERGE. Older = <code>data.grf</code>, Newer = <code>teysvault.grf</code>.</p><p><b>Servidor privado:</b> coloque <code>0=teysvault.grf</code> no topo do <code>data.ini</code>.</p>',alt:'Exemplo de data.ini antes e depois'},
+      {end:1,h:'Pronto!',t:'<p>Agora é só abrir o jogo e ver as edições funcionando.</p>'}]},
+    en:{close:'Close',prev:'Previous',next:'Next',of:' of ',slide:'Slide ',done:'Get started',S:[
+      {img:'01-visao-geral',k:'Welcome',h:'What is TEYSVault',t:'<p>A collection of <code>.grf</code> edits for Ragnarok: maps, effects, cursors, cards and more.</p><p>Pick the edits, download them as one file and install it in the game.</p>',alt:'TEYSVault home page'},
+      {img:'02b-idioma',fit:1,k:'Step 1',h:'Pick the language',t:'<p>Click <span class="hl">EN</span> or <span class="hl">PT</span>, at the top right.</p><p>The site remembers your choice.</p>',alt:'EN and PT buttons at the top of the site'},
+      {img:'02c-servidor',k:'Step 2',h:'Pick the server',t:'<p>In <span class="hl">Servers</span>, on the left bar, pick <b>LatamRO</b> or <b>Others</b>. The site remembers your choice.</p><p>Some edits do not work on LatamRO. They fade out, show <span class="hl">Not available on LatamRO</span> and cannot be selected.</p>',alt:'Servers box with LatamRO picked and unavailable edits faded'},
+      {img:'04-aviso-2',k:'Step 3',h:'Read the disclaimer',t:'<p>The <span class="hl">DISCLAIMER</span> box has 3 pages with the install steps.</p><p><span class="hl">Close</span> hides it. <span class="hl">Show disclaimer</span> brings it back.</p>',alt:'Disclaimer box, page 2'},
+      {img:'06-categorias',k:'Step 4',h:'Browse the categories',t:'<p>Click a category in the left bar to jump to it.</p><p>The number shows how many edits it has.</p>',alt:'Category bar'},
+      {img:'07-busca',k:'Step 5',h:'Search',t:'<p>Type in the <span class="hl">Search</span> box. It works in English and Portuguese.</p><ul><li><kbd>/</kbd> jumps to the search.</li><li><kbd>Esc</kbd> clears it.</li></ul>',alt:'Search for quagmire'},
+      {img:'08-selecionar',k:'Step 6',h:'Select',t:'<p>Click the cards you want. Selected = <span class="hl">gold border</span>.</p><p>Click again to unselect.</p>',alt:'Two cards selected with a gold border'},
+      {img:'09-so-um',k:'Step 7',h:'Only one per group',t:'<p>Cursors, Quagmire, map styles and Tarot: you can use only one of each.</p><p>Picking another unpicks the last one. The rest turn <span class="hl">silver</span>.</p>',alt:'Quagmire 2 selected, the others silver'},
+      {img:'10-baixar',fit:1,k:'Step 8',h:'Download',t:'<p>Click <span class="hl">Download selected</span>. You get one file: <code>teysvault.grf</code>.</p><p>Big maps (Scale Gray, Sunlight, Niflheim…) download on their own.</p>',alt:'Download selected button'},
+      {img:'05-aviso-3',k:'Step 9',h:'Install',t:'<p><b>GRF Editor:</b> EDIT → MERGE. Older = <code>data.grf</code>, Newer = <code>teysvault.grf</code>.</p><p><b>Private server:</b> put <code>0=teysvault.grf</code> at the top of <code>data.ini</code>.</p>',alt:'data.ini example, before and after'},
+      {end:1,h:'All set!',t:'<p>Open the game and see your edits in action.</p>'}]}};
+  var i=0, S=[], from=null;
+  var $=function(s){return wrap.querySelector(s);};
+  function open(){var pt=document.documentElement.lang==='pt-BR', L=T[pt?'pt-BR':'en'], dir='tutorial/img/'+(pt?'':'en/');
+    wrap.innerHTML='<div class="tut-dlg" role="dialog" aria-modal="true" aria-labelledby="tut-h" aria-roledescription="'+(pt?'carrossel':'carousel')+'">'+
+      '<div class="tut-top"><p class="npc-name" id="tut-h">TUTORIAL<small>TEYS</small></p><button type="button" class="tut-x" data-t="close" aria-label="'+L.close+'">×</button></div>'+
+      '<div aria-live="polite">'+L.S.map(function(s,n){
+        if(s.end) return '<div class="tut-s end" hidden><h2>'+s.h+'</h2>'+s.t+'<button type="button" class="npc-btn primary" data-t="close">'+L.done+'</button></div>';
+        return '<div class="tut-s"'+(n?' hidden':'')+'><div class="tut-pic"><img src="'+dir+s.img+'.webp" alt="'+s.alt+'"'+(s.fit?' class="fit"':'')+' decoding="async"></div>'+
+          '<div><p class="tut-k">'+s.k+'</p><h2>'+s.h+'</h2>'+s.t+'</div></div>';}).join('')+'</div>'+
+      '<div class="tut-act"><div class="tut-dots">'+L.S.map(function(_,n){return '<button type="button" data-go="'+n+'" aria-label="'+L.slide+(n+1)+'"></button>';}).join('')+'<span></span></div>'+
+        '<button type="button" class="npc-btn" data-t="prev">'+L.prev+'</button><button type="button" class="npc-btn primary" data-t="next">'+L.next+'</button></div></div>';
+    S=[].slice.call(wrap.querySelectorAll('.tut-s')); i=0; wrap.dataset.of=L.of;
+    from=document.activeElement; wrap.hidden=false; document.body.style.overflow='hidden'; go(0,true); $('[data-t="next"]').focus();}
+  function close(){wrap.hidden=true; wrap.innerHTML=''; document.body.style.overflow=''; if(from&&from.focus) from.focus(); from=null;}
+  function go(n,first){if(n<0||n>=S.length) return; var back=n<i; S[i].hidden=true; i=n; var s=S[i]; s.hidden=false;
+    if(!first){s.classList.remove('in','back'); void s.offsetWidth; s.classList.add('in'); if(back) s.classList.add('back');}
+    wrap.querySelectorAll('[data-go]').forEach(function(b,k){if(k===i) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');});
+    $('.tut-dots span').textContent=(i+1)+wrap.dataset.of+S.length;
+    var p=$('[data-t="prev"]'), x=$('[data-t="next"]'), f=document.activeElement;
+    p.disabled=i===0; x.disabled=i===S.length-1;
+    // keep the keyboard focus on a button that still works
+    if(f===p&&p.disabled) x.focus(); else if(f===x&&x.disabled) (s.querySelector('[data-t="close"]')||p).focus();}
+  btn.addEventListener('click',open);
+  wrap.addEventListener('click',function(e){var b=e.target.closest('[data-t],[data-go]');
+    if(e.target===wrap) return close(); if(!b) return;
+    if(b.dataset.go!=null) return go(+b.dataset.go);
+    var a=b.dataset.t; if(a==='close') close(); else if(a==='next') go(i+1); else if(a==='prev') go(i-1);});
+  wrap.addEventListener('keydown',function(e){e.stopPropagation(); // keeps the "/" search shortcut of the page away
+    if(e.key==='Escape'){e.preventDefault(); close(); return;}
+    if(e.key==='ArrowRight'){e.preventDefault(); go(i+1); return;}
+    if(e.key==='ArrowLeft'){e.preventDefault(); go(i-1); return;}
+    if(e.key==='Tab'){var bs=[].filter.call(wrap.querySelectorAll('button'),function(b){return !b.disabled&&b.offsetParent;}), f=bs[0], l=bs[bs.length-1];
+      if(e.shiftKey&&document.activeElement===f){e.preventDefault(); l.focus();} else if(!e.shiftKey&&document.activeElement===l){e.preventDefault(); f.focus();}}});
+  var x0=null;
+  wrap.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  wrap.addEventListener('touchend',function(e){if(x0==null) return; var d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) go(i+(d<0?1:-1)); x0=null;});
 })();
 // Animated Ragnarok Online cursor, drawn on the page so it animates in every browser (same as the original site)
 (function(){

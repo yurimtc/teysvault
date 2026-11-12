@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como usar o TEYSVault · Modelo 3: Tour interativo</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="stylesheet" href="tutorial.css">
+<!-- Modelo 3: the real site runs in a full-screen frame (same origin) and a spotlight walks over its parts.
+     The hole in the dark layer lets clicks reach the site, so the visitor can try each step for real.
+     "Mostrar" buttons run the step for them (type in the search, pick a card...). -->
+<style>
+html,body{height:100%;overflow:hidden}
+#site{position:fixed;inset:0;width:100%;height:100%;border:0}
+.dim{position:fixed;background:rgba(5,9,16,.72);z-index:10;transition:all .3s cubic-bezier(.2,.8,.2,1)}
+.ring{position:fixed;z-index:11;border:2px solid var(--accent);border-radius:12px;pointer-events:none;
+  transition:all .3s cubic-bezier(.2,.8,.2,1)}
+.tour[hidden],.dim[hidden],.ring[hidden]{display:none}
+.pop{position:fixed;z-index:12;width:min(360px,calc(100vw - 24px));background:var(--panel);border:1px solid var(--line-2);border-radius:12px;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);padding:16px 18px 14px;transition:top .3s cubic-bezier(.2,.8,.2,1),left .3s cubic-bezier(.2,.8,.2,1)}
+@media (prefers-reduced-motion:reduce){.dim,.ring,.pop{transition:none}}
+.pop .n{margin:0;color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pop h2{margin:4px 0 6px;font-size:19px}
+.pop p{margin:6px 0;font-size:14px;color:#d5deeb}
+.pop .act{display:flex;gap:8px;align-items:center;margin-top:12px}
+.pop .act .sp{flex:1}
+.pop .btn{min-height:36px;padding:0 12px;font-size:13px}
+.pop .try{background:transparent;border-style:dashed}
+.bar{height:3px;background:var(--line);border-radius:2px;margin-top:12px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.start{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:rgba(5,9,16,.78)}
+.start[hidden]{display:none}
+.start .box{width:min(440px,calc(100vw - 32px));background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:24px;text-align:center}
+.start h1{margin:0 0 8px;font-size:24px}
+.start p{margin:0 0 18px;color:var(--muted)}
+.start .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.reopen{position:fixed;right:16px;bottom:16px;z-index:12}
+.reopen[hidden],.pop .try[hidden]{display:none}
+</style>
+</head>
+<body>
+<iframe id="site" src="../index.html" title="TEYSVault"></iframe>
+
+<div class="start" id="start">
+  <div class="box">
+    <h1>Tour pelo TEYSVault</h1>
+    <p>8 passos rápidos em cima do site de verdade. Você pode clicar nas partes destacadas para testar.</p>
+    <div class="row"><button type="button" class="btn primary" id="go">Começar o tour</button><a class="btn" href="../index.html">Pular</a></div>
+  </div>
+</div>
+
+<div class="tour" id="tour" hidden>
+  <div class="dim" id="d1"></div><div class="dim" id="d2"></div><div class="dim" id="d3"></div><div class="dim" id="d4"></div>
+  <div class="ring" id="ring"></div>
+  <div class="pop" id="pop" role="dialog" aria-modal="false" aria-labelledby="pop-h">
+    <p class="n" id="pop-n"></p><h2 id="pop-h"></h2><div id="pop-t"></div>
+    <div class="act"><button type="button" class="btn try" id="try" hidden>Mostrar</button><span class="sp"></span>
+      <button type="button" class="btn" id="prev">Anterior</button><button type="button" class="btn primary" id="next">Próximo</button></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+</div>
+<button type="button" class="btn primary reopen" id="reopen" hidden>Rever tour</button>
+
+<script>
+(function(){
+  var F=document.getElementById('site'), W, Dc;
+  var $=function(id){return document.getElementById(id);};
+  // each step: target in the site, text, and an optional "Mostrar" action that runs inside the site
+  var STEPS=[
+    {sel:'.lang', h:'Escolha o idioma', t:'<p>Clique em <span class="hl">EN</span> ou <span class="hl">PT</span>. O site lembra sua escolha.</p>'},
+    {sel:'#guide', h:'Leia o aviso', t:'<p>A caixa <span class="hl">AVISO</span> tem 3 páginas com as instruções de instalação.</p><p>Use Próximo e Anterior dentro dela.</p>',
+      tryIt:function(){var b=Dc.querySelector('#guide [data-npc="next"]'); if(b&&!b.disabled) b.click();}, tryLabel:'Passar página'},
+    {sel:'nav.cats', h:'Categorias', t:'<p>Clique numa categoria para pular até ela. O número mostra quantas edições existem ali.</p>'},
+    {sel:'.search', h:'Busque', t:'<p>Digite o nome da edição, em português ou inglês.</p><p><kbd>/</kbd> foca a busca. <kbd>Esc</kbd> limpa.</p>',
+      tryIt:function(){var q=Dc.getElementById('q'); q.value='quagmire'; q.dispatchEvent(new W.Event('input')); W.scrollTo(0,0);}, tryLabel:'Buscar “quagmire”',
+      leave:function(){var q=Dc.getElementById('q'); if(q.value){q.value=''; q.dispatchEvent(new W.Event('input'));}}},
+    {sel:'[data-k="mapedits|No Trees"]', h:'Selecione', t:'<p>Clique no card para selecionar. Ele ganha <span class="hl">borda dourada</span>.</p><p>Clique de novo para desmarcar.</p>',
+      tryIt:function(){var c=Dc.querySelector('[data-k="mapedits|No Trees"]'); if(!c.classList.contains('sel')) c.click();}, tryLabel:'Selecionar este'},
+    {sel:'[data-k="effectedits|Quagmire 2"]', h:'Só um por grupo', t:'<p>Quagmire, cursores, estilos de mapa e Tarô: só um de cada.</p><p>Escolher um desmarca o outro. Os demais ficam <span class="hl">prateados</span>.</p>',
+      tryIt:function(){var c=Dc.querySelector('[data-k="effectedits|Quagmire 2"]'); if(!c.classList.contains('sel')) c.click();}, tryLabel:'Escolher Quagmire 2', pad:150},
+    {sel:'#dl-sel', h:'Baixe', t:'<p><span class="hl">Baixar selecionados</span> junta tudo em um arquivo: <code>teysvault.grf</code>.</p><p>Mapas grandes baixam separados. <span class="hl">Cancelar</span> limpa a seleção.</p>'},
+    {sel:'#guide', h:'Instale no jogo', t:'<p><b>GRF Editor:</b> EDIT → MERGE. Older = <code>data.grf</code>, Newer = <code>teysvault.grf</code>.</p><p><b>Servidor privado:</b> <code>0=teysvault.grf</code> no topo do <code>data.ini</code>.</p>',
+      enter:function(){var g=Dc.getElementById('guide'); if(g.classList.contains('closed')) g.querySelector('[data-npc="reopen"]').click();
+        for(var k=0;k<2;k++){var b=g.querySelector('[data-npc="next"]'); if(b&&!b.disabled) b.click();}}}
+  ];
+  var i=0, on=false;
+
+  function rect(){var s=STEPS[i], el=Dc.querySelector(s.sel); if(!el) return null;
+    var r=el.getBoundingClientRect(); if(!r.width&&!r.height) return null;
+    var fr=F.getBoundingClientRect(), p=8; return {x:fr.left+r.left-p, y:fr.top+r.top-p, w:r.width+p*2, h:r.height+p*2};}
+  function place(){if(!on) return; var r=rect(), vw=innerWidth, vh=innerHeight, pop=$('pop');
+    if(!r){r={x:vw/2,y:vh/2,w:0,h:0}; $('ring').hidden=true;} else $('ring').hidden=false;
+    var x=Math.max(0,r.x), y=Math.max(0,r.y), x2=Math.min(vw,r.x+r.w), y2=Math.min(vh,r.y+r.h);
+    // four dark boxes around the hole: the hole itself stays clickable
+    css($('d1'),0,0,vw,y); css($('d2'),0,y2,vw,vh-y2); css($('d3'),0,y,x,y2-y); css($('d4'),x2,y,vw-x2,y2-y);
+    css($('ring'),r.x,r.y,r.w,r.h);
+    // balloon: right of the target, else left, else below, else above; always kept on screen
+    var pw=pop.offsetWidth, ph=pop.offsetHeight, g=14, px, py;
+    if(x2+g+pw<=vw){px=x2+g; py=r.y;} else if(x-g-pw>=0){px=x-g-pw; py=r.y;}
+    else if(y2+g+ph<=vh){px=r.x; py=y2+g;} else {px=r.x; py=y-g-ph;}
+    px=Math.min(Math.max(12,px),vw-pw-12); py=Math.min(Math.max(12,py),vh-ph-12);
+    pop.style.left=px+'px'; pop.style.top=py+'px';}
+  function css(e,x,y,w,h){e.style.left=x+'px'; e.style.top=y+'px'; e.style.width=Math.max(0,w)+'px'; e.style.height=Math.max(0,h)+'px';}
+
+  function show(n,dir){var old=STEPS[i]; if(old&&old.leave&&n!==i) old.leave();
+    i=n; var s=STEPS[i];
+    if(s.enter) s.enter();
+    $('pop-n').textContent='Passo '+(i+1)+' de '+STEPS.length; $('pop-h').textContent=s.h; $('pop-t').innerHTML=s.t;
+    $('try').hidden=!s.tryIt; if(s.tryIt) $('try').textContent=s.tryLabel||'Mostrar';
+    $('prev').disabled=i===0; $('next').textContent=i===STEPS.length-1?'Concluir':'Próximo';
+    $('bar').style.width=((i+1)/STEPS.length*100)+'%';
+    var el=Dc.querySelector(s.sel);
+    if(el){var r=el.getBoundingClientRect(); var fixed=W.getComputedStyle(el).position==='sticky'||el.closest('header');
+      if(!fixed&&(r.top<80||r.bottom>W.innerHeight-20)) W.scrollTo({top:W.scrollY+r.top-(s.pad||110),behavior:'instant'});}
+    requestAnimationFrame(place);}
+  function start(){$('start').hidden=true; $('reopen').hidden=true; $('tour').hidden=false; on=true; show(0); $('next').focus();}
+  function stop(){var s=STEPS[i]; if(s&&s.leave) s.leave(); on=false; $('tour').hidden=true; $('reopen').hidden=false;}
+
+  $('go').onclick=start; $('reopen').onclick=start;
+  $('next').onclick=function(){if(i<STEPS.length-1) show(i+1); else stop();};
+  $('prev').onclick=function(){if(i>0) show(i-1);};
+  $('try').onclick=function(){STEPS[i].tryIt(); setTimeout(place,60);};
+  document.addEventListener('keydown',function(e){if(!on) return;
+    if(e.key==='Escape') stop(); if(e.key==='ArrowRight') $('next').click(); if(e.key==='ArrowLeft') $('prev').click();});
+  addEventListener('resize',place);
+  F.addEventListener('load',function(){W=F.contentWindow; Dc=F.contentDocument;
+    // the tour is in Portuguese: switch the site to PT too
+    var pt=Dc.querySelector('.lang [data-lang="pt-BR"]'); if(pt&&pt.getAttribute('aria-pressed')!=='true') pt.click();
+    W.addEventListener('scroll',place,{passive:true}); W.addEventListener('resize',place);
+    W.addEventListener('click',function(){setTimeout(place,60);});});
+})();
+</script>
+</body>
+</html>

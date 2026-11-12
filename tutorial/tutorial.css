@@ -1,0 +1,26 @@
+/* Shared look for the three tutorial models: same colors and font as the main site (index.html). */
+:root{
+  --bg:#0b1320; --panel:#121d2f; --panel-2:#17253b; --line:#24364f; --line-2:#2f4766;
+  --ink:#e8eef8; --muted:#9fb0c8; --accent:#f2c14e; --accent-ink:#2a1f00; --link:#9cc3ff;
+  --radius:10px; --font:"Segoe UI",Tahoma,system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.6 var(--font);color:var(--ink);background:var(--bg)}
+body.bg::before{content:"";position:fixed;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(11,19,32,.72),rgba(11,19,32,.9) 60%),url('../assets/bg.jpg') center/cover no-repeat}
+a{color:var(--link)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+img{max-width:100%;height:auto;display:block}
+kbd{font:600 12px/1 var(--font);background:var(--panel-2);border:1px solid var(--line-2);border-bottom-width:2px;
+  border-radius:5px;padding:3px 6px;color:var(--ink)}
+code{font:13px/1.4 Consolas,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px}
+pre{font:13px/1.5 Consolas,monospace;background:#0a111d;border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0;overflow:auto}
+.hl{color:var(--accent);font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:0 16px;border-radius:8px;border:1px solid var(--line-2);
+  background:var(--panel-2);color:var(--ink);font:600 14px var(--font);text-decoration:none;cursor:pointer}
+.btn[hidden]{display:none}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:default;border-color:var(--line-2)}
+.tip{border:1px solid rgba(242,193,78,.28);background:rgba(242,193,78,.07);padding:10px 14px;border-radius:8px;margin:14px 0}
+.tip b{color:var(--accent)}

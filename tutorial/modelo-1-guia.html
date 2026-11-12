@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como usar o TEYSVault · Modelo 1: Guia passo a passo</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="stylesheet" href="tutorial.css">
+<!-- Modelo 1: a long page with one numbered step per section and a real screenshot of the site
+     (captured with Playwright, see tutorial/img). Left column: table of contents that follows the scroll. -->
+<style>
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 80px;display:grid;grid-template-columns:230px 1fr;gap:28px}
+header.hero{grid-column:1/-1;padding:8px 0 6px}
+header.hero p.k{margin:0;color:var(--accent);font-weight:700;letter-spacing:.08em;font-size:12px;text-transform:uppercase}
+header.hero h1{margin:4px 0 8px;font-size:clamp(28px,4vw,40px);line-height:1.15}
+header.hero p{margin:0;color:var(--muted);max-width:62ch}
+header.hero .back{display:inline-block;margin-top:14px}
+nav.toc{position:sticky;top:20px;align-self:start;background:rgba(18,29,47,.85);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
+nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+nav.toc li{counter-increment:t}
+nav.toc a{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:14px}
+nav.toc a::before{content:counter(t);flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+  background:var(--panel-2);border:1px solid var(--line-2);font-size:12px;font-weight:700;color:var(--muted)}
+nav.toc a:hover{background:var(--panel-2)}
+nav.toc a.on{background:var(--panel-2)}
+nav.toc a.on::before{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+main{min-width:0}
+.step{background:rgba(18,29,47,.88);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:22px;scroll-margin-top:20px}
+.step-h{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.step-h .num{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:18px}
+.step-h h2{margin:0;font-size:22px}
+.step p{margin:8px 0;max-width:70ch}
+.step ul{margin:8px 0;padding-left:20px;max-width:70ch}
+.step li{margin:4px 0}
+figure{margin:16px 0 4px}
+figure .shot{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:#000;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+figure.small .shot{display:inline-block;max-width:100%}
+figcaption{color:var(--muted);font-size:13px;margin-top:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two figure{margin:0}
+@media (max-width:860px){
+  .wrap{grid-template-columns:1fr}
+  nav.toc{position:static}
+  nav.toc ol{display:flex;flex-wrap:wrap;gap:4px}
+  nav.toc a{padding:6px 8px}
+  .two{grid-template-columns:1fr}
+  .step{padding:18px 16px}
+}
+</style>
+</head>
+<body class="bg">
+<div class="wrap">
+  <header class="hero">
+    <p class="k">Tutorial · TEYSVault</p>
+    <h1>Como usar o site, passo a passo</h1>
+    <p>Do primeiro acesso até o arquivo <code>teysvault.grf</code> instalado no seu jogo. São 8 passos curtos, com prints do site.</p>
+    <a class="btn back" href="../index.html">← Voltar ao site</a>
+  </header>
+
+  <nav class="toc" aria-label="Passos">
+    <ol>
+      <li><a href="#idioma">Escolha o idioma</a></li>
+      <li><a href="#aviso">Leia o aviso</a></li>
+      <li><a href="#categorias">Navegue pelas categorias</a></li>
+      <li><a href="#busca">Busque uma edição</a></li>
+      <li><a href="#selecionar">Selecione as edições</a></li>
+      <li><a href="#so-um">Itens de “só um”</a></li>
+      <li><a href="#baixar">Baixe o arquivo</a></li>
+      <li><a href="#instalar">Instale no jogo</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="step" id="idioma">
+      <div class="step-h"><span class="num">1</span><h2>Escolha o idioma</h2></div>
+      <p>No canto superior direito ficam os botões <span class="hl">EN</span> e <span class="hl">PT</span>. O idioma escolhido fica salvo para a próxima visita.</p>
+      <figure><div class="shot"><img src="img/02-topo.webp" alt="Barra do topo com o campo Buscar e os botões EN e PT" width="1425" height="67"></div>
+        <figcaption>Topo do site: busca no meio, idioma à direita.</figcaption></figure>
+    </section>
+
+    <section class="step" id="aviso">
+      <div class="step-h"><span class="num">2</span><h2>Leia o aviso</h2></div>
+      <p>A caixa <span class="hl">AVISO</span> tem 3 páginas. Use <span class="hl">Próximo</span> e <span class="hl">Anterior</span> para passar. Ela explica como instalar as edições (passo 8).</p>
+      <p><span class="hl">Fechar</span> esconde a caixa. Para ver de novo, clique em <span class="hl">Mostrar aviso</span>.</p>
+      <figure><div class="shot"><img src="img/03-aviso-1.webp" alt="Caixa de aviso, página 1 de 3" width="936" height="266" loading="lazy"></div>
+        <figcaption>Página 1 de 3 do aviso.</figcaption></figure>
+    </section>
+
+    <section class="step" id="categorias">
+      <div class="step-h"><span class="num">3</span><h2>Navegue pelas categorias</h2></div>
+      <div class="two">
+        <div>
+          <p>A barra da esquerda lista todas as categorias: Utilitários, Edições de Mapas, Efeitos, Diversos, Cartas grandes e Cursores.</p>
+          <p>Clique em uma categoria para pular direto para ela. O número ao lado mostra quantas edições existem ali.</p>
+          <p>As subcategorias (Músicas, Pneuma, Armadilhas…) aparecem embaixo da categoria principal.</p>
+        </div>
+        <figure class="small"><div class="shot"><img src="img/06-categorias.webp" alt="Lista de categorias com a contagem de cada uma" width="236" height="607" loading="lazy"></div></figure>
+      </div>
+    </section>
+
+    <section class="step" id="busca">
+      <div class="step-h"><span class="num">4</span><h2>Busque uma edição</h2></div>
+      <p>Digite no campo <span class="hl">Buscar</span>. A lista filtra enquanto você digita, em português ou inglês.</p>
+      <ul>
+        <li>Atalho: aperte <kbd>/</kbd> para ir direto para a busca.</li>
+        <li>Aperte <kbd>Esc</kbd> para limpar a busca.</li>
+        <li>Nada apareceu? Tente uma palavra mais curta, como “cursor” ou “mapa”.</li>
+      </ul>
+      <figure><div class="shot"><img src="img/07-busca.webp" alt="Busca por quagmire mostrando só os 7 itens de Quagmire" width="1440" height="900" loading="lazy"></div>
+        <figcaption>Buscando “quagmire”: só os itens de Quagmire ficam na tela.</figcaption></figure>
+    </section>
+
+    <section class="step" id="selecionar">
+      <div class="step-h"><span class="num">5</span><h2>Selecione as edições</h2></div>
+      <p>Clique em um card para selecionar. Ele ganha <span class="hl">borda dourada</span>. Clique de novo para desmarcar.</p>
+      <p>Você pode selecionar várias edições de categorias diferentes. Todas vão para o mesmo download.</p>
+      <figure><div class="shot"><img src="img/08-selecionar.webp" alt="Sem Árvores e Sem Água selecionados, com borda dourada" width="1440" height="900" loading="lazy"></div>
+        <figcaption>“Sem Árvores” e “Sem Água” selecionados.</figcaption></figure>
+    </section>
+
+    <section class="step" id="so-um">
+      <div class="step-h"><span class="num">6</span><h2>Itens de “só um”</h2></div>
+      <p>Algumas edições trocam o mesmo arquivo do jogo, então só dá para usar uma de cada vez. Exemplos: cursores, Quagmire, estilos de mapa, Cartas de Tarô.</p>
+      <p>Ao escolher uma, a anterior do mesmo grupo é desmarcada sozinha. As outras opções do grupo ficam <span class="hl">prateadas</span>.</p>
+      <figure><div class="shot"><img src="img/09-so-um.webp" alt="Quagmire 2 selecionado, os outros Quagmire ficam prateados" width="1440" height="900" loading="lazy"></div>
+        <figcaption>Quagmire 2 escolhido: os outros Quagmire ficam prateados.</figcaption></figure>
+    </section>
+
+    <section class="step" id="baixar">
+      <div class="step-h"><span class="num">7</span><h2>Baixe o arquivo</h2></div>
+      <div class="two">
+        <div>
+          <p>Clique em <span class="hl">Baixar selecionados</span>. O número mostra quantas edições estão marcadas.</p>
+          <p>O site junta tudo em um único arquivo: <code>teysvault.grf</code>.</p>
+          <p><span class="hl">Cancelar</span> desmarca tudo de uma vez.</p>
+        </div>
+        <figure class="small"><div class="shot"><img src="img/10-baixar.webp" alt="Botão Baixar selecionados com 3 itens e botão Cancelar" width="240" height="105" loading="lazy"></div></figure>
+      </div>
+      <div class="tip"><b>Mapas grandes:</b> Scale Gray, Rachel Style, GrayOrange Scale, Classic Gray, Sunlight, Moonlight e Niflheim são pesados. Eles baixam em um arquivo separado.</div>
+    </section>
+
+    <section class="step" id="instalar">
+      <div class="step-h"><span class="num">8</span><h2>Instale no jogo</h2></div>
+      <p><b>Opção A — GRF Editor</b> (junta a edição dentro do <code>data.grf</code>):</p>
+      <ul>
+        <li>Abra o <a href="https://github.com/Tokeiburu/GRFEditor" target="_blank" rel="noopener">GRF Editor</a>.</li>
+        <li>Clique em <b>EDIT</b> e depois em <b>MERGE</b>.</li>
+        <li>Em <b>OLDER GRF</b>, escolha o <code>data.grf</code> do jogo.</li>
+        <li>Em <b>NEWER GRF</b>, escolha o <code>teysvault.grf</code>.</li>
+        <li>Clique em <b>MERGE</b>.</li>
+      </ul>
+      <p><b>Opção B — data.ini</b> (servidores privados): copie o <code>teysvault.grf</code> para a pasta do jogo e coloque ele como <code>0=</code> no <code>data.ini</code>. Os outros descem uma posição.</p>
+      <div class="two">
+        <div><p class="hl" style="margin:0 0 6px">Antes</p><pre>[Data]
+0=PrivateServerName.grf
+1=data.grf</pre></div>
+        <div><p class="hl" style="margin:0 0 6px">Depois</p><pre>[Data]
+0=teysvault.grf
+1=PrivateServerName.grf
+2=data.grf</pre></div>
+      </div>
+      <div class="tip"><b>Dica:</b> faça uma cópia do <code>data.grf</code> antes do merge. Assim dá para voltar atrás.</div>
+    </section>
+  </main>
+</div>
+<script>
+// highlights the step being read in the table of contents
+(function(){var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(!e.isIntersecting) return;
+    links.forEach(function(a){a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id);});});},{rootMargin:'-30% 0px -60% 0px'});
+  document.querySelectorAll('.step').forEach(function(s){io.observe(s);});})();
+</script>
+</body>
+</html>

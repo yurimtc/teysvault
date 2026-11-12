@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Como usar o TEYSVault · Modelo 2: Slides</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="stylesheet" href="tutorial.css">
+<!-- Modelo 2: one step per slide, in the same "NPC box" look as the AVISO box of the site
+     (name tag, Anterior / Próximo / Fechar). Arrow keys and swipe also change the slide. -->
+<style>
+body{min-height:100vh;display:grid;place-items:center;padding:24px 16px}
+.npc{width:min(980px,100%);min-width:0;background:rgba(18,29,47,.94);border:1px solid var(--line-2);border-radius:14px;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);padding:22px 24px 18px}
+.npc-name{margin:0 0 14px;font-weight:800;color:var(--accent);font-size:17px;letter-spacing:.02em;display:flex;align-items:baseline;gap:8px}
+.npc-name small{color:var(--muted);font-weight:600;font-size:12px}
+.npc-name .back{margin-left:auto;font-size:13px;font-weight:600}
+.stage{position:relative;overflow:hidden}
+.slide{display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:center}
+.slide[hidden]{display:none}
+.slide>*{min-width:0}
+.slide.in{animation:in .28s cubic-bezier(.2,.8,.2,1)}
+.slide.in.back{animation-name:in-back}
+@keyframes in{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes in-back{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.in{animation:none}}
+.pic{border:1px solid var(--line-2);border-radius:10px;overflow:hidden;background:#060b14;aspect-ratio:16/10;display:grid;place-items:center}
+.pic img{width:100%;height:100%;object-fit:contain}
+.txt .step{margin:0;color:var(--muted);font-size:13px;font-weight:600}
+.txt h2{margin:4px 0 10px;font-size:26px;line-height:1.2}
+.txt p{margin:8px 0}
+.txt ul{margin:8px 0;padding-left:20px}
+.txt li{margin:4px 0}
+.npc-actions{display:flex;align-items:center;gap:10px;border-top:1px solid var(--line);margin-top:18px;padding-top:14px}
+.dots{display:flex;gap:6px;margin-right:auto;align-items:center}
+.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line-2);cursor:pointer}
+.dots button[aria-current="step"]{background:var(--accent);width:24px;border-radius:5px}
+.dots span{color:var(--muted);font-size:13px;margin-left:8px}
+.slide.end:not([hidden]){display:block}
+.end{text-align:center;padding:30px 10px}
+.end h2{font-size:28px;margin:0 0 8px}
+.end p{color:var(--muted);margin:0 0 18px}
+@media (max-width:760px){
+  .slide{grid-template-columns:1fr}
+  .npc{padding:16px}
+  .txt h2{font-size:22px}
+  .npc-actions{flex-wrap:wrap}
+  .dots{flex-basis:100%;margin-bottom:4px}
+  .npc-actions .btn{flex:1;justify-content:center}
+  .dots button{width:8px;height:8px}
+  .dots button[aria-current="step"]{width:18px}
+}
+</style>
+</head>
+<body class="bg">
+<div class="npc" role="region" aria-roledescription="carrossel" aria-label="Tutorial do TEYSVault">
+  <p class="npc-name">TUTORIAL<small>TEYS</small><a class="back" href="../index.html">Voltar ao site</a></p>
+  <div class="stage" aria-live="polite">
+
+    <div class="slide" data-s>
+      <div class="pic"><img src="img/01-visao-geral.webp" alt="Página inicial do TEYSVault" width="1440" height="900"></div>
+      <div class="txt"><p class="step">Bem-vindo</p><h2>O que é o TEYSVault</h2>
+        <p>Um acervo de edições de <code>.grf</code> para Ragnarok: mapas, efeitos, cursores, cartas e mais.</p>
+        <p>Você escolhe as edições, baixa tudo em um arquivo só e instala no jogo.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/02b-idioma.webp" alt="Botões EN e PT no topo do site" width="440" height="100" loading="lazy" style="width:80%;height:auto"></div>
+      <div class="txt"><p class="step">Passo 1</p><h2>Escolha o idioma</h2>
+        <p>Clique em <span class="hl">EN</span> ou <span class="hl">PT</span>, no canto superior direito.</p>
+        <p>O site lembra sua escolha.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/04-aviso-2.webp" alt="Caixa de aviso, página 2: como fazer o merge" width="936" height="366" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 2</p><h2>Leia o aviso</h2>
+        <p>A caixa <span class="hl">AVISO</span> tem 3 páginas com as instruções de instalação.</p>
+        <p><span class="hl">Fechar</span> esconde. <span class="hl">Mostrar aviso</span> traz de volta.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/06-categorias.webp" alt="Barra de categorias" width="236" height="607" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 3</p><h2>Navegue pelas categorias</h2>
+        <p>Clique em uma categoria na barra da esquerda para pular até ela.</p>
+        <p>O número mostra quantas edições existem ali.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/07-busca.webp" alt="Busca por quagmire" width="1440" height="900" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 4</p><h2>Busque</h2>
+        <p>Digite no campo <span class="hl">Buscar</span>. Funciona em português e inglês.</p>
+        <ul><li><kbd>/</kbd> vai para a busca.</li><li><kbd>Esc</kbd> limpa.</li></ul></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/08-selecionar.webp" alt="Dois cards selecionados com borda dourada" width="1440" height="900" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 5</p><h2>Selecione</h2>
+        <p>Clique nos cards que quiser. Selecionado = <span class="hl">borda dourada</span>.</p>
+        <p>Clique de novo para desmarcar.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/09-so-um.webp" alt="Quagmire 2 selecionado, os outros prateados" width="1440" height="900" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 6</p><h2>Só um por grupo</h2>
+        <p>Cursores, Quagmire, estilos de mapa e Tarô: só dá para usar um de cada.</p>
+        <p>Ao escolher outro, o anterior é desmarcado. Os demais ficam <span class="hl">prateados</span>.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/10-baixar.webp" alt="Botão Baixar selecionados com 3 itens" width="240" height="105" loading="lazy" style="width:70%;height:auto"></div>
+      <div class="txt"><p class="step">Passo 7</p><h2>Baixe</h2>
+        <p>Clique em <span class="hl">Baixar selecionados</span>. Sai um arquivo só: <code>teysvault.grf</code>.</p>
+        <p>Mapas grandes (Scale Gray, Sunlight, Niflheim…) baixam separados.</p></div>
+    </div>
+
+    <div class="slide" data-s hidden>
+      <div class="pic"><img src="img/05-aviso-3.webp" alt="Exemplo de data.ini antes e depois" width="936" height="405" loading="lazy"></div>
+      <div class="txt"><p class="step">Passo 8</p><h2>Instale</h2>
+        <p><b>GRF Editor:</b> EDIT → MERGE. Older = <code>data.grf</code>, Newer = <code>teysvault.grf</code>.</p>
+        <p><b>Servidor privado:</b> coloque <code>0=teysvault.grf</code> no topo do <code>data.ini</code>.</p></div>
+    </div>
+
+    <div class="slide end" data-s hidden>
+      <h2>Pronto!</h2>
+      <p>Agora é só abrir o jogo e ver as edições funcionando.</p>
+      <a class="btn primary" href="../index.html">Ir para o site</a>
+    </div>
+
+  </div>
+  <div class="npc-actions">
+    <div class="dots" id="dots"></div>
+    <button type="button" class="btn" id="prev">Anterior</button>
+    <button type="button" class="btn primary" id="next">Próximo</button>
+  </div>
+</div>
+<script>
+(function(){
+  var S=[].slice.call(document.querySelectorAll('[data-s]')), i=0, dots=document.getElementById('dots'),
+      prev=document.getElementById('prev'), next=document.getElementById('next');
+  dots.innerHTML=S.map(function(_,n){return '<button type="button" aria-label="Slide '+(n+1)+'"></button>';}).join('')+'<span id="cnt"></span>';
+  var B=[].slice.call(dots.querySelectorAll('button'));
+  function go(n){if(n<0||n>=S.length) return; var back=n<i; S[i].hidden=true; i=n;
+    var s=S[i]; s.hidden=false; s.classList.remove('in','back'); void s.offsetWidth; s.classList.add('in'); if(back) s.classList.add('back');
+    B.forEach(function(b,k){if(k===i) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current');});
+    document.getElementById('cnt').textContent=(i+1)+' de '+S.length;
+    prev.disabled=i===0; next.disabled=i===S.length-1;}
+  prev.onclick=function(){go(i-1);}; next.onclick=function(){go(i+1);};
+  B.forEach(function(b,k){b.onclick=function(){go(k);};});
+  document.addEventListener('keydown',function(e){if(e.key==='ArrowRight') go(i+1); if(e.key==='ArrowLeft') go(i-1);});
+  var x0=null, st=document.querySelector('.stage');
+  st.addEventListener('touchstart',function(e){x0=e.touches[0].clientX;},{passive:true});
+  st.addEventListener('touchend',function(e){if(x0==null) return; var d=e.changedTouches[0].clientX-x0; if(Math.abs(d)>50) go(i+(d<0?1:-1)); x0=null;});
+  go(0);
+})();
+</script>
+</body>
+</html>

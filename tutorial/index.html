@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tutorial do TEYSVault · 3 modelos</title>
+<link rel="icon" type="image/png" href="../assets/favicon.png">
+<link rel="stylesheet" href="tutorial.css">
+<!-- Picker for the three tutorial models (only for choosing; the chosen one is linked from the site). -->
+<style>
+.wrap{max-width:1080px;margin:0 auto;padding:40px 20px 60px}
+h1{margin:0 0 6px;font-size:clamp(26px,4vw,36px)}
+.sub{margin:0 0 28px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{display:flex;flex-direction:column;background:rgba(18,29,47,.9);border:1px solid var(--line);border-radius:14px;overflow:hidden;color:var(--ink);text-decoration:none}
+.card:hover{border-color:var(--accent)}
+.card .pic{aspect-ratio:16/10;background:#060b14;border-bottom:1px solid var(--line)}
+.card .pic img{width:100%;height:100%;object-fit:cover;object-position:top}
+.card .b{padding:16px 18px 18px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card .k{margin:0;color:var(--accent);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.card h2{margin:0;font-size:20px}
+.card p{margin:0;color:var(--muted);font-size:14px}
+.card ul{margin:4px 0 0;padding-left:18px;font-size:14px;color:#d5deeb}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="bg">
+<div class="wrap">
+  <h1>Tutorial do TEYSVault</h1>
+  <p class="sub">3 modelos. Abra cada um e escolha o que combina mais com o site.</p>
+  <div class="grid">
+    <a class="card" href="modelo-1-guia.html">
+      <div class="pic"><img src="img/m1.webp" alt="" width="720" height="450"></div>
+      <div class="b"><p class="k">Modelo 1</p><h2>Guia passo a passo</h2>
+        <p>Uma página com 8 passos numerados e prints do site.</p>
+        <ul><li>Fácil de ler e de buscar</li><li>Índice lateral que acompanha a leitura</li><li>Bom para quem quer tudo em um lugar</li></ul></div>
+    </a>
+    <a class="card" href="modelo-2-slides.html">
+      <div class="pic"><img src="img/m2.webp" alt="" width="720" height="450"></div>
+      <div class="b"><p class="k">Modelo 2</p><h2>Slides estilo NPC</h2>
+        <p>Um passo por vez, no mesmo visual da caixa de AVISO do site.</p>
+        <ul><li>Curto e direto</li><li>Setas do teclado e deslize no celular</li><li>Dá para embutir no lugar do aviso</li></ul></div>
+    </a>
+    <a class="card" href="modelo-3-tour.html">
+      <div class="pic"><img src="img/m3.webp" alt="" width="720" height="450"></div>
+      <div class="b"><p class="k">Modelo 3</p><h2>Tour interativo</h2>
+        <p>Destaca cada parte do site real, com botões para testar na hora.</p>
+        <ul><li>Mostra onde clicar de verdade</li><li>Botões “Mostrar” fazem o passo</li><li>Melhor no computador</li></ul></div>
+    </a>
+  </div>
+</div>
+</body>
+</html>
